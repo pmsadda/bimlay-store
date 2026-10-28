@@ -2336,3 +2336,26 @@ body > .bimlay-floating-action {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Larger storefront navigation */
+.desktop-links a {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.mobile-menu a {
+  font-size: 17px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.bottom-nav a,
+.bottom-nav button {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.bottom-nav svg {
+  width: 25px;
+  height: 25px;
+}
