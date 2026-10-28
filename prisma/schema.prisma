@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+
+  products Product[]
+
+  @@index([parentId, sortOrder])
+}
+
+model Product {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  shortDescription String?
+  description      String        @default("")
+  status           ProductStatus @default(DRAFT)
+  isFeatured       Boolean       @default(false)
+  seoTitle         String?
+  seoDescription   String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  variants   ProductVariant[]
+  images     ProductImage[]
+  orderItems OrderItem[]
+
+  @@index([categoryId, status])
+  @@index([status, isFeatured])
+  @@index([createdAt])
+}
+
+model ProductVariant {
+  id             String   @id @default(cuid())
+  sku            String   @unique
+  size           String?
+  color          String?
+  colorHex       String?
+  price          Decimal  @db.Decimal(12, 2)
+  compareAtPrice Decimal? @db.Decimal(12, 2)
+  stock          Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([productId, isActive])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+enum AdminRole {
+  OWNER
+  STAFF
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(STAFF)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions    AdminSession[]
+  orderAudits OrderAudit[]
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  adminId String
+  admin   AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model AdminLoginLimit {
+  id        String   @id
+  attempts  Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model StoreSetting {
+  id                    String   @id @default("main")
+  storeName             String   @default("BIMLAY")
+  supportPhone          String?
+  whatsappNumber        String?
+  facebookPageUrl       String?
+  supportEmail          String?
+  dhakaDeliveryCharge   Decimal  @db.Decimal(12, 2)
+  outsideDeliveryCharge Decimal  @db.Decimal(12, 2)
+  codEnabled            Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum DeliveryZone {
+  DHAKA
+  OUTSIDE_DHAKA
+}
+
+model Order {
+  id               String @id @default(cuid())
+  orderNumber      String @unique
+  checkoutKey      String @unique
+  receiptTokenHash String
+
+  customerName String
+  phone        String
+  email        String?
+  district     String
+  address      String
+  notes        String?
+
+  deliveryZone DeliveryZone
+  subtotal     Decimal      @db.Decimal(16, 2)
+  deliveryFee  Decimal      @db.Decimal(12, 2)
+  total        Decimal      @db.Decimal(16, 2)
+  currency     String       @default("BDT")
+
+  paymentMethod String        @default("COD")
+  paymentStatus PaymentStatus @default(UNPAID)
+  status        OrderStatus   @default(PENDING)
+
+  stockReleasedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  items      OrderItem[]
+  audits     OrderAudit[]
+  customerId String?
+  customer   Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([customerId, createdAt])
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  productName String
+  sku         String
+  size        String?
+  color       String?
+  imageUrl    String?
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(12, 2)
+  lineTotal   Decimal @db.Decimal(16, 2)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model CheckoutLimit {
+  id        String   @id
+  attempts  Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model OrderAudit {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  adminId String?
+  admin   AdminUser? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  actorEmail String
+  event      String
+  fromValue  String
+  toValue    String
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([adminId])
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  passwordHash    String
+  isActive        Boolean   @default(true)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions CustomerSession[]
+  orders   Order[]
+}
+
+model CustomerSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
+model CustomerAuthLimit {
+  id        String   @id
+  attempts  Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model HeroSlide {
+  id           String   @id @default(cuid())
+  eyebrow      String?
+  title        String
+  subtitle     String?
+  desktopImage String
+  mobileImage  String?
+  altText      String
+  buttonText   String   @default("Shop Collection")
+  buttonHref   String   @default("/shop")
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+enum HomeSectionKey {
+  FOR_HIM
+  FOR_HER
+  STORY
+}
+
+model HomeSection {
+  key            HomeSectionKey @id
+  eyebrow        String?
+  title          String
+  description    String?
+  imageUrl       String?
+  mobileImageUrl String?
+  altText        String         @default("")
+  buttonText     String
+  buttonHref     String
+  isActive       Boolean        @default(false)
+  updatedAt      DateTime       @updatedAt
+}
