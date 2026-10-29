@@ -1187,15 +1187,91 @@ body:has(.admin-root) {
 }
 
 .admin-section-nav a {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 500;
   line-height: 1.4;
-  padding: 12px 16px;
+  padding: 14px 18px;
   white-space: nowrap;
 }
 
 @media (max-width: 767px) {
   .admin-section-nav a {
-    font-size: 15px;
-    padding: 11px 14px;
+    font-size: 16px;
+    padding: 12px 15px;
+  }
+}
+
+.category-image-field {
+  display: grid;
+  gap: 16px;
+}
+
+.category-image-field strong {
+  display: block;
+  font-size: 16px;
+}
+
+.category-image-selection {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.category-image-selection img {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.category-remove-image {
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.coupon-admin-card {
+  display: grid;
+  gap: 15px;
+}
+
+.coupon-admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: #655b4e;
+  font-size: 13px;
+}
+
+.coupon-admin-meta span {
+  padding: 7px 10px;
+  background: #f7f3eb;
+}
+
+.coupon-admin-toggle {
+  padding: 10px 16px;
+  border: 1px solid #9a805c;
+  background: transparent;
+  color: #392e20;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.coupon-admin-toggle:hover,
+.coupon-admin-toggle:focus-visible {
+  background: #f0e7d8;
+}
+
+@media (max-width: 640px) {
+  .coupon-admin-meta {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }

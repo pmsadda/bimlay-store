@@ -63,3 +63,11 @@ export const HomeSectionKey = {
 } as const
 
 export type HomeSectionKey = (typeof HomeSectionKey)[keyof typeof HomeSectionKey]
+
+
+export const CouponKind = {
+  PERCENT: 'PERCENT',
+  FIXED: 'FIXED'
+} as const
+
+export type CouponKind = (typeof CouponKind)[keyof typeof CouponKind]

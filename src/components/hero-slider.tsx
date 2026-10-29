@@ -1,30 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Pause,
-  Play,
-} from "lucide-react";
-
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import type { HeroSlideData } from "@/lib/hero-slides";
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-};
 
 export default function HeroSlider({
   slides,
-  categories,
 }: {
   slides: HeroSlideData[];
-  categories: Category[];
 }) {
+
   const [index, setIndex] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
   const [hovered, setHovered] = useState(false);
@@ -88,21 +74,7 @@ export default function HeroSlider({
     );
   }
 
-  if (!slide) {
-    return (
-      <section className="hero hero-slider">
-        <p className="eyebrow">BIMLAY</p>
-        <h1>Objects of everyday desire.</h1>
-
-        <div className="hero-controls shell">
-          <Link href="/shop" className="primary-button">
-            Explore the collection <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
+if (!slide) return null;
   return (
     <section
       className="hero hero-slider"
@@ -247,24 +219,6 @@ export default function HeroSlider({
         </div>
       )}
 
-      <div className="hero-controls shell">
-        <nav className="category-links" aria-label="Collections">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/shop?category=${encodeURIComponent(category.slug)}`}
-            >
-              {category.name.toUpperCase()}
-              <ArrowRight size={14} />
-            </Link>
-          ))}
-        </nav>
-
-        <Link href={slide.buttonHref} className="primary-button">
-          {slide.buttonText}
-          <ArrowRight size={16} />
-        </Link>
-      </div>
     </section>
   );
 }

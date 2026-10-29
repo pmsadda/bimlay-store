@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+
 import { useCartCount } from "@/lib/cart-store";
 import HeroSlider from "@/components/hero-slider";
 import type { HeroSlideData } from "@/lib/hero-slides";
 import StoreContact from "@/components/store-contact";
 import { HomeCampaigns, HomeStory } from "@/components/home-sections";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import LiveSearch from "@/components/live-search";
 
 import type { HomeSectionData } from "@/lib/home-sections";
 import {
@@ -48,6 +50,14 @@ type Props = {
   totalPages?: number;
   heroSlides?: HeroSlideData[];
   homeSections?: HomeSectionData[];
+  filterSizes?: string[];
+  filterColors?: string[];
+  minPrice?: string;
+  maxPrice?: string;
+  selectedSize?: string;
+  selectedColor?: string;
+  inStockOnly?: boolean;
+  sort?: "newest" | "price_asc" | "price_desc";
 };
 
 function money(value: string) {
@@ -84,6 +94,14 @@ export default function Storefront({
   children,
   heroSlides = [],
   homeSections = [],
+  filterSizes = [],
+  filterColors = [],
+  minPrice = "",
+  maxPrice = "",
+  selectedSize = "",
+  selectedColor = "",
+  inStockOnly = false,
+  sort = "newest",
 }: Props) {
   const cartCount = useCartCount();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -97,7 +115,51 @@ export default function Storefront({
     (category) => category.parentId === null,
   );
 
-  <h2>{mode === "home" ? "Featured Picks" : "The Collection"}</h2>;
+  const categoryCarouselRef = useRef<HTMLDivElement>(null);
+  const categoryCount = mainCategories.length;
+
+  useEffect(() => {
+    const track = categoryCarouselRef.current;
+
+    if (mode !== "home" || !track || categoryCount < 2) return;
+
+    const timer = window.setInterval(() => {
+      if (
+        document.visibilityState !== "visible" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        track.matches(":hover") ||
+        track.contains(document.activeElement)
+      ) {
+        return;
+      }
+
+      const firstCard = track.querySelector<HTMLElement>(".home-category-card");
+      if (!firstCard) return;
+
+      const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+      const step = firstCard.getBoundingClientRect().width + gap;
+      const maxScroll = track.scrollWidth - track.clientWidth;
+
+      if (maxScroll < 4) return;
+
+      track.scrollTo({
+        left:
+          track.scrollLeft >= maxScroll - 3
+            ? 0
+            : Math.min(track.scrollLeft + step, maxScroll),
+        behavior: "smooth",
+      });
+    }, 4500);
+
+    return () => window.clearInterval(timer);
+  }, [mode, categoryCount]);
+
+  <h2>
+    {mode === "home"
+      ? "Featured Picks"
+      : (categories.find((category) => category.slug === selectedCategory)
+          ?.name ?? "Shop all products")}
+  </h2>;
 
   function categoryHref(slug: string) {
     return `/shop?category=${encodeURIComponent(slug)}`;
@@ -107,10 +169,35 @@ export default function Storefront({
     const params = new URLSearchParams();
 
     if (query) params.set("q", query);
-    if (selectedCategory) params.set("category", selectedCategory);
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    }
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (selectedSize) params.set("size", selectedSize);
+    if (selectedColor) params.set("color", selectedColor);
+    if (inStockOnly) params.set("inStock", "1");
+    if (sort !== "newest") params.set("sort", sort);
+
     params.set("page", String(targetPage));
 
     return `/shop?${params.toString()}`;
+  }
+
+  function shopCategoryHref(slug = "") {
+    const params = new URLSearchParams();
+
+    if (query) params.set("q", query);
+    if (slug) params.set("category", slug);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (selectedSize) params.set("size", selectedSize);
+    if (selectedColor) params.set("color", selectedColor);
+    if (inStockOnly) params.set("inStock", "1");
+    if (sort !== "newest") params.set("sort", sort);
+
+    const search = params.toString();
+    return search ? `/shop?${search}` : "/shop";
   }
 
   function toggleSaved(id: string) {
@@ -205,14 +292,7 @@ export default function Storefront({
             method="get"
             className="store-search shell"
           >
-            <input
-              name="q"
-              type="search"
-              placeholder="Search by product name or SKU"
-              defaultValue={query}
-              maxLength={100}
-              aria-label="Search by product name or SKU"
-            />
+            <LiveSearch initialQuery={query} />
 
             <button type="submit" className="primary-button">
               Search
@@ -247,7 +327,58 @@ export default function Storefront({
         {children}
         {mode === "home" && (
           <>
-            <HeroSlider slides={heroSlides} categories={mainCategories} />
+            <HeroSlider slides={heroSlides} />
+
+            {mainCategories.length > 0 && (
+              <section
+                className="home-category-section shell"
+                aria-labelledby="home-category-title"
+              >
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">Curated for every day</p>
+                    <h2 id="home-category-title">Shop by category</h2>
+                  </div>
+                  <Link href="/shop" className="text-link">
+                    Explore all <ArrowRight size={16} />
+                  </Link>
+                </div>
+
+                <div
+                  className="home-category-grid"
+                  ref={categoryCarouselRef}
+                  aria-label="Shop by category"
+                >
+                  {mainCategories.map((category) => (
+                    <Link
+                      key={category.id}
+                      href={categoryHref(category.slug)}
+                      className="home-category-card"
+                    >
+                      <div className="home-category-media">
+                        {category.imageUrl ? (
+                          <Image
+                            src={category.imageUrl}
+                            alt={category.name}
+                            fill
+                            sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
+                            unoptimized
+                          />
+                        ) : (
+                          <span className="home-category-placeholder">
+                            BIMLAY
+                          </span>
+                        )}
+                      </div>
+                      <div className="home-category-caption">
+                        <span>{category.name}</span>
+                        <ArrowRight size={20} aria-hidden="true" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <HomeCampaigns sections={homeSections} />
           </>
@@ -257,11 +388,17 @@ export default function Storefront({
           <section id="products" className="products-section shell">
             <div className="section-heading">
               <div>
-                <h2>{mode === "home" ? "Featured Picks" : "The Collection"}</h2>
+                <h2>
+                  {mode === "home"
+                    ? "Featured Picks"
+                    : (categories.find(
+                        (category) => category.slug === selectedCategory,
+                      )?.name ?? "Shop All Products")}
+                </h2>
 
                 <p>
                   {mode === "home"
-                    ? "A thoughtful selection for your everyday."
+                    ? "A Thoughtful Selection For Your Everyday."
                     : `${total} products found`}
                 </p>
               </div>
@@ -274,38 +411,136 @@ export default function Storefront({
             </div>
 
             {mode === "shop" && (
-              <form action="/shop" method="get" className="store-filter">
-                <input
-                  name="q"
-                  type="search"
-                  defaultValue={query}
-                  maxLength={100}
-                  placeholder="Search products"
-                  aria-label="Search products"
-                />
-
-                <select
-                  name="category"
-                  defaultValue={selectedCategory}
-                  aria-label="Filter by category"
+              <div className="shop-tools">
+                <nav
+                  className="shop-category-tabs"
+                  aria-label="Product categories"
                 >
-                  <option value="">All categories</option>
+                  <Link
+                    href={shopCategoryHref()}
+                    aria-current={!selectedCategory ? "page" : undefined}
+                  >
+                    All products
+                  </Link>
 
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.slug}>
-                      {category.label}
-                    </option>
+                  {mainCategories.map((category) => (
+                    <Link
+                      key={category.id}
+                      href={shopCategoryHref(category.slug)}
+                      aria-current={
+                        selectedCategory === category.slug ? "page" : undefined
+                      }
+                    >
+                      {category.name}
+                    </Link>
                   ))}
-                </select>
+                </nav>
+                <details className="shop-filter-panel" open={Boolean(query)}>
+                  <summary>Search &amp; filters</summary>
 
-                <button type="submit" className="primary-button">
-                  Apply
-                </button>
+                  <form action="/shop" method="get" className="store-filter">
+                    <input
+                      name="q"
+                      type="search"
+                      defaultValue={query}
+                      maxLength={100}
+                      placeholder="Search products"
+                      aria-label="Search products"
+                    />
 
-                <Link href="/shop" className="text-link">
-                  Reset
-                </Link>
-              </form>
+                    <select
+                      name="category"
+                      defaultValue={selectedCategory}
+                      aria-label="Filter by category"
+                    >
+                      <option value="">All categories</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.slug}>
+                          {category.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="shop-advanced-filters">
+                      <label>
+                        <span>Minimum price (৳)</span>
+                        <input
+                          name="minPrice"
+                          type="number"
+                          min="0"
+                          max="1000000"
+                          step="0.01"
+                          defaultValue={minPrice}
+                          placeholder="From"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Maximum price (৳)</span>
+                        <input
+                          name="maxPrice"
+                          type="number"
+                          min="0"
+                          max="1000000"
+                          step="0.01"
+                          defaultValue={maxPrice}
+                          placeholder="To"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Size</span>
+                        <select name="size" defaultValue={selectedSize}>
+                          <option value="">All sizes</option>
+                          {filterSizes.map((sizeOption) => (
+                            <option key={sizeOption} value={sizeOption}>
+                              {sizeOption}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label>
+                        <span>Colour</span>
+                        <select name="color" defaultValue={selectedColor}>
+                          <option value="">All colours</option>
+                          {filterColors.map((colorOption) => (
+                            <option key={colorOption} value={colorOption}>
+                              {colorOption}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label>
+                        <span>Sort by</span>
+                        <select name="sort" defaultValue={sort}>
+                          <option value="newest">Newest first</option>
+                          <option value="price_asc">Price: low to high</option>
+                          <option value="price_desc">Price: high to low</option>
+                        </select>
+                      </label>
+
+                      <label className="shop-stock-filter">
+                        <input
+                          name="inStock"
+                          type="checkbox"
+                          value="1"
+                          defaultChecked={inStockOnly}
+                        />
+                        <span>In stock only</span>
+                      </label>
+                    </div>
+
+                    <button type="submit" className="primary-button">
+                      Apply
+                    </button>
+                    <Link href="/shop" className="text-link">
+                      Reset
+                    </Link>
+                  </form>
+                </details>
+              </div>
             )}
 
             {visibleProducts.length === 0 && (
@@ -492,7 +727,6 @@ export default function Storefront({
           </button>
         </div>
       )}
-      
     </>
   );
 }

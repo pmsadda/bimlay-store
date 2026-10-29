@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
-import path from "node:path";
-import { stat } from "node:fs/promises";
+
 import { mediaImageExists } from "@/lib/media-storage";
 
 export type ProductEditState = {

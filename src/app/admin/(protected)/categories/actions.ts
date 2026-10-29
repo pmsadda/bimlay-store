@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
+import {
+  MEDIA_FILENAME_PATTERN,
+  mediaImageExists,
+} from "@/lib/media-storage";
 
 export type CategoryFormState = {
   error: string;
@@ -32,6 +36,7 @@ export async function saveCategory(
   const name = readText(formData, "name");
   const slug = readText(formData, "slug").toLowerCase();
   const description = readText(formData, "description");
+  const imageUrl = readText(formData, "imageUrl");
   const parentId = readText(formData, "parentId") || null;
   const orderText = readText(formData, "sortOrder");
   const sortOrder = Number(orderText);
@@ -83,6 +88,21 @@ export async function saveCategory(
   }
 
   try {
+    if (imageUrl) {
+  const filename = imageUrl.startsWith("/media/")
+    ? imageUrl.slice("/media/".length)
+    : "";
+
+  if (
+    !MEDIA_FILENAME_PATTERN.test(filename) ||
+    !(await mediaImageExists(imageUrl))
+  ) {
+    return {
+      error: "Choose an uploaded category image.",
+      success: "",
+    };
+  }
+}
     const validationError = await db.$transaction(
       async (tx): Promise<string | null> => {
         if (id) {
@@ -127,6 +147,7 @@ export async function saveCategory(
           name,
           slug,
           description: description || null,
+          imageUrl: imageUrl || null,
           parentId,
           sortOrder,
           isActive,
@@ -176,6 +197,8 @@ export async function saveCategory(
 
   revalidatePath("/admin/categories");
   revalidatePath("/admin");
+  revalidatePath("/");
+revalidatePath("/shop");
 
   return {
     error: "",

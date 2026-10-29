@@ -6,6 +6,11 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { getCustomer } from "@/lib/customer-auth";
+import {
+  calculateCouponDiscount,
+  CouponValidationError,
+  normalizeCouponCode,
+} from "@/lib/coupons";
 
 class CheckoutError extends Error {}
 
@@ -142,6 +147,8 @@ export async function submitCheckout(input: unknown): Promise<CheckoutResult> {
     const notes = stringValue(data.notes);
     const deliveryZone = stringValue(data.deliveryZone);
     const expectedTotal = stringValue(data.expectedTotal);
+    const couponInput = stringValue(data.couponCode);
+    const couponCode = couponInput ? normalizeCouponCode(couponInput) : null;
     const items = parseItems(data.items);
 
     if (customerName.length < 2 || customerName.length > 100) {
@@ -315,12 +322,51 @@ export async function submitCheckout(input: unknown): Promise<CheckoutResult> {
                 ? settings.dhakaDeliveryCharge
                 : settings.outsideDeliveryCharge;
 
-            const total = subtotal.add(deliveryFee);
+            const coupon = couponCode
+              ? await tx.coupon.findUnique({
+                  where: { code: couponCode },
+                })
+              : null;
+
+            if (couponCode && !coupon) {
+              throw new CheckoutError("Coupon code is invalid.");
+            }
+
+            const discount = coupon
+              ? calculateCouponDiscount(coupon, subtotal, new Date())
+              : new Prisma.Decimal(0);
+
+            const total = subtotal.sub(discount).add(deliveryFee);
 
             if (!total.eq(new Prisma.Decimal(expectedTotal))) {
               throw new CheckoutError(
                 "Pricing or delivery charges changed. Refresh checkout and review the updated total before ordering.",
               );
+            }
+
+            if (coupon) {
+              const claimed = await tx.coupon.updateMany({
+                where: {
+                  id: coupon.id,
+                  isActive: true,
+                  ...(coupon.usageLimit !== null
+                    ? {
+                        usedCount: {
+                          lt: coupon.usageLimit,
+                        },
+                      }
+                    : {}),
+                },
+                data: {
+                  usedCount: { increment: 1 },
+                },
+              });
+
+              if (claimed.count !== 1) {
+                throw new CheckoutError(
+                  "This coupon is no longer available. Review your total.",
+                );
+              }
             }
 
             for (const item of items) {
@@ -357,6 +403,9 @@ export async function submitCheckout(input: unknown): Promise<CheckoutResult> {
                 deliveryZone,
                 subtotal,
                 deliveryFee,
+                discount,
+                couponCode,
+                couponId: coupon?.id ?? null,
                 total,
                 items: {
                   create: orderItems,
@@ -411,9 +460,10 @@ export async function submitCheckout(input: unknown): Promise<CheckoutResult> {
     return {
       ok: false,
       error:
-        error instanceof CheckoutError
-          ? error.message
-          : "Could not complete checkout. Please retry from this page.",
+       error instanceof CheckoutError ||
+error instanceof CouponValidationError
+  ? error.message
+  : "Could not complete checkout. Please retry from this page."
     };
   }
 }

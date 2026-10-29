@@ -67,7 +67,8 @@ export const ModelName = {
   CustomerSession: 'CustomerSession',
   CustomerAuthLimit: 'CustomerAuthLimit',
   HeroSlide: 'HeroSlide',
-  HomeSection: 'HomeSection'
+  HomeSection: 'HomeSection',
+  Coupon: 'Coupon'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -215,6 +216,9 @@ export const OrderScalarFieldEnum = {
   subtotal: 'subtotal',
   deliveryFee: 'deliveryFee',
   total: 'total',
+  discount: 'discount',
+  couponCode: 'couponCode',
+  couponId: 'couponId',
   currency: 'currency',
   paymentMethod: 'paymentMethod',
   paymentStatus: 'paymentStatus',
@@ -338,6 +342,25 @@ export const HomeSectionScalarFieldEnum = {
 } as const
 
 export type HomeSectionScalarFieldEnum = (typeof HomeSectionScalarFieldEnum)[keyof typeof HomeSectionScalarFieldEnum]
+
+
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  kind: 'kind',
+  value: 'value',
+  minimumSubtotal: 'minimumSubtotal',
+  maximumDiscount: 'maximumDiscount',
+  usageLimit: 'usageLimit',
+  usedCount: 'usedCount',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
 
 
 export const SortOrder = {

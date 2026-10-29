@@ -126,3 +126,8 @@ export type HeroSlide = Prisma.HeroSlideModel
  * 
  */
 export type HomeSection = Prisma.HomeSectionModel
+/**
+ * Model Coupon
+ * 
+ */
+export type Coupon = Prisma.CouponModel

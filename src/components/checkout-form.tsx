@@ -2,16 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
+import { quoteCheckoutCoupon } from "@/app/actions/coupons";
+import { useEffect, useState, useTransition } from "react";
 
-import {
-  quoteCart,
-  type CartQuoteResult,
-} from "@/app/actions/cart";
+import { quoteCart, type CartQuoteResult } from "@/app/actions/cart";
 import { submitCheckout } from "@/app/actions/checkout";
 
 import {
@@ -31,9 +25,7 @@ function checkoutIdentity(): {
   checkoutKey: string;
   receiptSecret: string;
 } {
-  const existing = window.sessionStorage.getItem(
-    CHECKOUT_SESSION_KEY,
-  );
+  const existing = window.sessionStorage.getItem(CHECKOUT_SESSION_KEY);
 
   if (existing) {
     const parsed = JSON.parse(existing);
@@ -45,12 +37,12 @@ function checkoutIdentity(): {
       return parsed;
     }
 
-    throw new Error("Invalid checkout session. Please reopen this browser tab.");
+    throw new Error(
+      "Invalid checkout session. Please reopen this browser tab.",
+    );
   }
 
-  const bytes = window.crypto.getRandomValues(
-    new Uint8Array(32),
-  );
+  const bytes = window.crypto.getRandomValues(new Uint8Array(32));
 
   const identity = {
     checkoutKey: window.crypto.randomUUID(),
@@ -59,18 +51,14 @@ function checkoutIdentity(): {
       .join(""),
   };
 
-  window.sessionStorage.setItem(
-    CHECKOUT_SESSION_KEY,
-    JSON.stringify(identity),
-  );
+  window.sessionStorage.setItem(CHECKOUT_SESSION_KEY, JSON.stringify(identity));
 
   return identity;
 }
 
 function cents(value: string) {
   const [whole, fraction = ""] = value.split(".");
-  return Number(whole) * 100 +
-    Number(fraction.padEnd(2, "0").slice(0, 2));
+  return Number(whole) * 100 + Number(fraction.padEnd(2, "0").slice(0, 2));
 }
 
 function decimalFromCents(value: number) {
@@ -84,10 +72,7 @@ function money(value: string) {
   }).format(Number(value))}`;
 }
 
-export default function CheckoutForm({
-  dhakaCharge,
-  outsideCharge,
-}: Props) {
+export default function CheckoutForm({ dhakaCharge, outsideCharge }: Props) {
   const router = useRouter();
   const snapshot = useCartSnapshot();
 
@@ -99,6 +84,15 @@ export default function CheckoutForm({
   const [zone, setZone] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponMessage, setCouponMessage] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    snapshot: string;
+    code: string;
+    subtotal: string;
+    discount: string;
+  } | null>(null);
+  const [couponPending, startCouponTransition] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
@@ -127,19 +121,13 @@ export default function CheckoutForm({
   }, [snapshot]);
 
   if (!reply || reply.snapshot !== snapshot) {
-    return (
-      <div className="store-loading">
-        Checking your order...
-      </div>
-    );
+    return <div className="store-loading">Checking your order...</div>;
   }
 
   if (!reply.result.ok) {
     return (
       <div className="shell checkout-page">
-        <p className="admin-form-error">
-          {reply.result.error}
-        </p>
+        <p className="admin-form-error">{reply.result.error}</p>
         <Link href="/cart" className="text-link">
           Return to bag
         </Link>
@@ -148,6 +136,11 @@ export default function CheckoutForm({
   }
 
   const quote = reply.result;
+  const activeCoupon =
+    appliedCoupon?.snapshot === snapshot &&
+    appliedCoupon.subtotal === quote.subtotal
+      ? appliedCoupon
+      : null;
 
   if (quote.lines.length === 0 || quote.hasIssues) {
     return (
@@ -173,12 +166,49 @@ export default function CheckoutForm({
         : null;
 
   const total = decimalFromCents(
-    cents(quote.subtotal) + (shipping ? cents(shipping) : 0),
+    cents(quote.subtotal) -
+      (activeCoupon ? cents(activeCoupon.discount) : 0) +
+      (shipping ? cents(shipping) : 0),
   );
 
-  function placeOrder(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
+  function applyCoupon() {
+    const requestedCode = couponCode.trim();
+
+    if (!requestedCode) {
+      setCouponMessage("Enter a coupon code.");
+      return;
+    }
+
+    setCouponMessage("");
+    setAppliedCoupon(null);
+
+    startCouponTransition(async () => {
+      try {
+        const result = await quoteCheckoutCoupon(
+          readCartItems(snapshot),
+          requestedCode,
+        );
+
+        if (!result.ok) {
+          setCouponMessage(result.error);
+          return;
+        }
+
+        setAppliedCoupon({
+          snapshot,
+          code: result.code,
+          subtotal: result.subtotal,
+          discount: result.discount,
+        });
+        setCouponCode(result.code);
+        setCouponMessage(`${result.code} applied successfully.`);
+      } catch {
+        setCouponMessage("Could not check this coupon. Please try again.");
+      }
+    });
+  }
+
+  function placeOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -198,6 +228,7 @@ export default function CheckoutForm({
           notes: formData.get("notes"),
           deliveryZone: zone,
           expectedTotal: total,
+          couponCode: activeCoupon?.code ?? "",
           items: readCartItems(snapshot),
         });
 
@@ -211,18 +242,14 @@ export default function CheckoutForm({
         try {
           completeCartOrder(result.orderId, result.items);
 
-          window.sessionStorage.removeItem(
-            CHECKOUT_SESSION_KEY,
-          );
+          window.sessionStorage.removeItem(CHECKOUT_SESSION_KEY);
         } catch {
           // Keep the checkout identity for a safe retry.
         }
 
         router.push(`/order-confirmation/${result.orderId}`);
       } catch {
-        setError(
-          "Checkout could not finish. Please retry from this page.",
-        );
+        setError("Checkout could not finish. Please retry from this page.");
       }
     });
   }
@@ -235,10 +262,7 @@ export default function CheckoutForm({
       </div>
 
       <form onSubmit={placeOrder} className="checkout-layout">
-        <fieldset
-          disabled={pending}
-          className="checkout-fields"
-        >
+        <fieldset disabled={pending} className="checkout-fields">
           <h2>Delivery details</h2>
 
           <div className="category-form-grid">
@@ -335,13 +359,12 @@ export default function CheckoutForm({
           <h2>Order summary</h2>
 
           {quote.lines.map((line) => (
-            <div
-              className="checkout-order-line"
-              key={line.variantId}
-            >
+            <div className="checkout-order-line" key={line.variantId}>
               <div>
                 <strong>{line.name}</strong>
-                <p>{line.option} · Qty {line.quantity}</p>
+                <p>
+                  {line.option} · Qty {line.quantity}
+                </p>
               </div>
               <span>{money(line.lineTotal!)}</span>
             </div>
@@ -352,12 +375,70 @@ export default function CheckoutForm({
             <strong>{money(quote.subtotal)}</strong>
           </div>
 
+          <div className="checkout-coupon">
+            <label htmlFor="checkout-coupon-code">Coupon code</label>
+
+            <div className="checkout-coupon-controls">
+              <input
+                id="checkout-coupon-code"
+                type="text"
+                value={couponCode}
+                onChange={(event) => {
+                  setCouponCode(event.target.value);
+                  setAppliedCoupon(null);
+                  setCouponMessage("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    applyCoupon();
+                  }
+                }}
+                maxLength={32}
+                autoComplete="off"
+                placeholder="Enter code"
+              />
+
+              <button
+                type="button"
+                onClick={applyCoupon}
+                disabled={pending || couponPending || !couponCode.trim()}
+              >
+                {couponPending ? "Checking..." : "Apply"}
+              </button>
+            </div>
+
+            {activeCoupon && (
+              <button
+                type="button"
+                className="checkout-coupon-remove"
+                onClick={() => {
+                  setAppliedCoupon(null);
+                  setCouponCode("");
+                  setCouponMessage("");
+                }}
+                disabled={pending || couponPending}
+              >
+                Remove coupon
+              </button>
+            )}
+
+            <p className="checkout-coupon-message" role="status">
+              {couponMessage}
+            </p>
+          </div>
+
           <div className="cart-summary-row">
             <span>Delivery</span>
-            <span>
-              {shipping ? money(shipping) : "Choose area"}
-            </span>
+            <span>{shipping ? money(shipping) : "Choose area"}</span>
           </div>
+
+          {activeCoupon && (
+            <div className="cart-summary-row checkout-discount">
+              <span>Coupon ({activeCoupon.code})</span>
+              <strong>−{money(activeCoupon.discount)}</strong>
+            </div>
+          )}
 
           <div className="cart-summary-row checkout-total">
             <strong>Total</strong>
@@ -370,17 +451,13 @@ export default function CheckoutForm({
           </div>
 
           <div aria-live="polite" aria-atomic="true">
-            {error && (
-              <p className="admin-form-error cart-message">
-                {error}
-              </p>
-            )}
+            {error && <p className="admin-form-error cart-message">{error}</p>}
           </div>
 
           <button
             type="submit"
             className="primary-button checkout-submit"
-            disabled={pending || !zone}
+            disabled={pending || couponPending || !zone}
           >
             {pending ? "Placing order..." : "Place order"}
           </button>
