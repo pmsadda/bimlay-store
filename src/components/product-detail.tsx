@@ -64,7 +64,7 @@ export default function ProductDetail({
     product.variants[0];
 
   const [selectedId, setSelectedId] = useState(firstAvailable.id);
-  
+
   const [quantity, setQuantity] = useState("1");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -259,48 +259,133 @@ export default function ProductDetail({
           </section>
 
           {/* Product Reviews & Ratings Section */}
-          <section className="product-reviews-section" style={{ marginTop: "3rem", borderTop: "1px solid #eaeaea", paddingTop: "2rem" }}>
+          <section
+            className="product-reviews-section"
+            style={{
+              marginTop: "3rem",
+              borderTop: "1px solid #eaeaea",
+              paddingTop: "2rem",
+            }}
+          >
             <h2>Customer Reviews &amp; Ratings</h2>
 
             <div className="reviews-list" style={{ margin: "1.5rem 0" }}>
               {product.reviews && product.reviews.length > 0 ? (
                 product.reviews.map((review) => (
-                  <div key={review.id} style={{ padding: "1rem 0", borderBottom: "1px solid #f0f0f0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div
+                    key={review.id}
+                    style={{
+                      padding: "1rem 0",
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
                       <strong>{review.userName}</strong>
                       <span style={{ fontSize: "0.85rem", color: "#666" }}>
-                        {new Date(review.createdAt).toLocaleDateString()}
+                        {new Date(review.createdAt).toISOString().split("T")[0]}
                       </span>
                     </div>
                     <div style={{ color: "#f59e0b", margin: "0.25rem 0" }}>
-                      {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                      {"★".repeat(review.rating)}
+                      {"☆".repeat(5 - review.rating)}
                     </div>
-                    {review.comment && <p style={{ margin: "0.5rem 0" }}>{review.comment}</p>}
+                    {review.comment && (
+                      <p style={{ margin: "0.5rem 0" }}>{review.comment}</p>
+                    )}
                     {review.imageUrl && (
                       <div style={{ marginTop: "0.5rem" }}>
-                        <img src={review.imageUrl} alt="Review attachment" style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "4px" }} />
+                        <img
+                          src={review.imageUrl}
+                          alt="Review attachment"
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                        />
                       </div>
                     )}
                   </div>
                 ))
               ) : (
-                <p style={{ color: "#666" }}>No reviews yet. Be the first to review this product!</p>
+                <p style={{ color: "#666" }}>
+                  No reviews yet. Be the first to review this product!
+                </p>
               )}
             </div>
 
-            <div className="add-review-form" style={{ background: "#fafafa", padding: "1.5rem", borderRadius: "8px", marginTop: "2rem" }}>
+            <div
+              className="add-review-form"
+              style={{
+                background: "#fafafa",
+                padding: "1.5rem",
+                borderRadius: "8px",
+                marginTop: "2rem",
+              }}
+            >
               <h3>Write a Review</h3>
-              <form action={addProductReview} style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
+              <form
+                action={addProductReview}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                  marginTop: "1rem",
+                }}
+              >
                 <input type="hidden" name="productId" value={product.id} />
-                
+
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Your Name</label>
-                  <input type="text" name="userName" required placeholder="Enter your name" style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }} />
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    name="userName"
+                    required
+                    placeholder="Enter your name"
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  />
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rating (1 to 5)</label>
-                  <select name="rating" required style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Rating (1 to 5)
+                  </label>
+                  <select
+                    name="rating"
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  >
                     <option value="5">5 Stars - Excellent</option>
                     <option value="4">4 Stars - Good</option>
                     <option value="3">3 Stars - Average</option>
@@ -310,16 +395,60 @@ export default function ProductDetail({
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Your Review</label>
-                  <textarea name="comment" rows={3} placeholder="Write your feedback..." style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }}></textarea>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Your Review
+                  </label>
+                  <textarea
+                    name="comment"
+                    rows={3}
+                    placeholder="Write your feedback..."
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  ></textarea>
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Image URL (Optional)</label>
-                  <input type="url" name="imageUrl" placeholder="https://example.com/image.jpg" style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }} />
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Image URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    name="imageUrl"
+                    placeholder="https://example.com/image.jpg"
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  />
                 </div>
 
-                <button type="submit" className="primary-button" style={{ alignSelf: "flex-start", padding: "0.5rem 1.5rem", cursor: "pointer" }}>
+                <button
+                  type="submit"
+                  className="primary-button"
+                  style={{
+                    alignSelf: "flex-start",
+                    padding: "0.5rem 1.5rem",
+                    cursor: "pointer",
+                  }}
+                >
                   Submit Review
                 </button>
               </form>

@@ -171,7 +171,7 @@ async function ProductContent({ params }: PageProps) {
               variant.compareAtPrice?.toFixed(2) ?? null,
             stock: variant.stock,
           })),
-          reviews: product.reviews.map((rev) => ({
+          reviews: (product.reviews || []).map((rev) => ({
             id: rev.id,
             userName: rev.userName,
             rating: rev.rating,
