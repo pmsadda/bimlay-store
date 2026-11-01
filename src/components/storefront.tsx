@@ -38,6 +38,7 @@ type Props = {
     category: StoreCategory;
     products: StoreProduct[];
   }[];
+  flashProducts?: StoreProduct[];
   mode:
     | "home"
     | "shop"
@@ -71,6 +72,37 @@ function money(value: string) {
   }).format(Number(value))}`;
 }
 
+function ProductPrice({ product }: { product: StoreProduct }) {
+  const isFlash =
+    product.flashPrice && product.flashSaleEnd && Number(product.price) > 0;
+
+  if (isFlash) {
+    const discount = Math.round(
+      (1 - Number(product.flashPrice) / Number(product.price)) * 100,
+    );
+    return (
+      <>
+        {product.hasMultipleVariants && (
+          <span className="store-from">From </span>
+        )}
+        <strong className="flash-price">{money(product.flashPrice!)}</strong>{" "}
+        <del className="store-regular-price">{money(product.price)}</del>
+        <span className="flash-badge">⚡ -{discount}%</span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {product.hasMultipleVariants && <span className="store-from">From </span>}
+      {money(product.price)}
+      {product.regularPrice && (
+        <del className="store-regular-price">{money(product.regularPrice)}</del>
+      )}
+    </>
+  );
+}
+
 function Brand() {
   return (
     <Link href="/" className="brand brand-original" aria-label="BIMLAY home">
@@ -91,6 +123,7 @@ export default function Storefront({
   products,
   categoryProducts = [],
   mode,
+  flashProducts = [],
   query = "",
   selectedCategory = "",
   total = 0,
@@ -355,12 +388,10 @@ export default function Storefront({
                     >
                       <div className="home-category-media">
                         {category.imageUrl ? (
-                          <Image
+                          <img
                             src={category.imageUrl}
                             alt={category.name}
-                            fill
-                            sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
-                            unoptimized
+                            className="home-category-img"
                           />
                         ) : (
                           <span className="home-category-placeholder">
@@ -374,6 +405,95 @@ export default function Storefront({
                       </div>
                     </Link>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {/* ⚡ Flash Sale section — একবারই */}
+            {flashProducts.length > 0 && (
+              <section
+                id="flash-sale"
+                className="flash-sale-section shell"
+                aria-labelledby="flash-sale-title"
+              >
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow" style={{ color: "#dc2626" }}>
+                      ⚡ Limited time only
+                    </p>
+                    <h2 id="flash-sale-title" style={{ color: "#dc2626" }}>
+                      Flash Sale
+                    </h2>
+                    <p>Grab these deals before the timer runs out.</p>
+                  </div>
+
+                  <Link href="/shop" className="text-link">
+                    View all <ArrowRight size={14} />
+                  </Link>
+                </div>
+
+                <div className="product-grid">
+                  {flashProducts.map((product) => {
+                    const isSaved = saved.includes(product.id);
+
+                    return (
+                      <article key={product.id}>
+                        <div className="product-image">
+                          <Link
+                            href={`/products/${product.slug}`}
+                            aria-label={`View ${product.name}`}
+                          >
+                            <Image
+                              src={product.image}
+                              alt={product.imageAlt}
+                              fill
+                              unoptimized
+                              sizes="(max-width: 640px) 50vw, 25vw"
+                            />
+                          </Link>
+
+                          <button
+                            type="button"
+                            className="icon-button wishlist-button"
+                            aria-label={
+                              isSaved
+                                ? `Unsave ${product.name}`
+                                : `Save ${product.name}`
+                            }
+                            aria-pressed={isSaved}
+                            onClick={() => toggleSaved(product.id)}
+                          >
+                            <Heart
+                              size={17}
+                              strokeWidth={1.5}
+                              fill={isSaved ? "#816334" : "none"}
+                              color={isSaved ? "#816334" : "currentColor"}
+                            />
+                          </button>
+
+                          {!product.inStock && (
+                            <span className="store-stock-label">
+                              Out of stock
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="product-info">
+                          <div>
+                            <h3>
+                              <Link href={`/products/${product.slug}`}>
+                                {product.name}
+                              </Link>
+                            </h3>
+
+                            <p>
+                              <ProductPrice product={product} />
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </section>
             )}
@@ -602,32 +722,7 @@ export default function Storefront({
                         </h3>
 
                         <p>
-                          {product.flashPrice && product.flashSaleEnd ? (
-                            <>
-                              {product.hasMultipleVariants && (
-                                <span className="store-from">From </span>
-                              )}
-                              <strong className="flash-price">
-                                {money(product.flashPrice)}
-                              </strong>{" "}
-                              <del className="store-regular-price">
-                                {money(product.price)}
-                              </del>
-                              <span className="flash-badge">⚡ FLASH</span>
-                            </>
-                          ) : (
-                            <>
-                              {product.hasMultipleVariants && (
-                                <span className="store-from">From </span>
-                              )}
-                              {money(product.price)}
-                              {product.regularPrice && (
-                                <del className="store-regular-price">
-                                  {money(product.regularPrice)}
-                                </del>
-                              )}
-                            </>
-                          )}
+                          <ProductPrice product={product} />
                         </p>
                       </div>
                     </div>
@@ -735,35 +830,7 @@ export default function Storefront({
                                 </h3>
 
                                 <p>
-                                  {product.flashPrice &&
-                                  product.flashSaleEnd ? (
-                                    <>
-                                      {product.hasMultipleVariants && (
-                                        <span className="store-from">
-                                          From{" "}
-                                        </span>
-                                      )}
-                                     <strong className="flash-price">{money(product.flashPrice)}</strong>
-                                      <del className="store-regular-price">
-                                        {money(product.price)}
-                                      </del>
-                                      <span className="flash-badge">⚡ FLASH</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      {product.hasMultipleVariants && (
-                                        <span className="store-from">
-                                          From{" "}
-                                        </span>
-                                      )}
-                                      {money(product.price)}
-                                      {product.regularPrice && (
-                                        <del className="store-regular-price">
-                                          {money(product.regularPrice)}
-                                        </del>
-                                      )}
-                                    </>
-                                  )}
+                                  <ProductPrice product={product} />
                                 </p>
                               </div>
                             </div>
