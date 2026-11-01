@@ -3,8 +3,6 @@ import { db } from "@/lib/db";
 import { getHeroSlides } from "@/lib/hero-slides";
 import { getHomeSections } from "@/lib/home-sections";
 
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   const [heroSlides, homeSections, rawCategories, featuredProducts] = await Promise.all([
     getHeroSlides(),
