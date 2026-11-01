@@ -40,17 +40,11 @@ async function ConfirmationContent({ params }: Props) {
   const receipt = cookieStore.get("bimlay_order_receipt")?.value;
   const [receiptOrderId, secret] = (receipt ?? "").split(":");
 
-  if (
-    receiptOrderId !== id ||
-    !secret ||
-    !/^[a-f0-9]{64}$/.test(secret)
-  ) {
+  if (receiptOrderId !== id || !secret || !/^[a-f0-9]{64}$/.test(secret)) {
     notFound();
   }
 
-  const receiptTokenHash = createHash("sha256")
-    .update(secret)
-    .digest("hex");
+  const receiptTokenHash = createHash("sha256").update(secret).digest("hex");
 
   const order = await db.order.findFirst({
     where: {
@@ -69,24 +63,24 @@ async function ConfirmationContent({ params }: Props) {
   const categories = await getStoreCategories();
 
   return (
-    <Storefront
-      mode="checkout"
-      categories={categories}
-      products={[]}
-    >
+    <Storefront mode="checkout" categories={categories} products={[]}>
       <section className="shell checkout-page">
         <div className="order-received-heading">
           <CheckCircle2 size={42} strokeWidth={1.3} />
           <p className="eyebrow">Thank you for choosing BIMLAY</p>
           <h1>Your order has been received.</h1>
-          <p>Order number: <strong>{order.orderNumber}</strong></p>
+          <p>
+            Order number: <strong>{order.orderNumber}</strong>
+          </p>
           <p>Status: {order.status.replaceAll("_", " ")}</p>
         </div>
 
         <div className="checkout-layout">
           <section className="checkout-fields">
             <h2>Delivery details</h2>
-            <p><strong>{order.customerName}</strong></p>
+            <p>
+              <strong>{order.customerName}</strong>
+            </p>
             <p>{order.phone}</p>
             <p className="order-address">{order.address}</p>
             <p>{order.district}</p>
@@ -98,9 +92,7 @@ async function ConfirmationContent({ params }: Props) {
               </>
             )}
 
-            <p className="category-help">
-              Payment method: Cash on Delivery
-            </p>
+            <p className="category-help">Payment method: Cash on Delivery</p>
             <p className="category-help">
               Payment status: {order.paymentStatus}
             </p>
@@ -110,16 +102,12 @@ async function ConfirmationContent({ params }: Props) {
             <h2>Order summary</h2>
 
             {order.items.map((item) => (
-              <div
-                className="checkout-order-line"
-                key={item.id}
-              >
+              <div className="checkout-order-line" key={item.id}>
                 <div>
                   <strong>{item.productName}</strong>
                   <p>
-                    {[item.size, item.color]
-                      .filter(Boolean)
-                      .join(" / ") || "Standard"}
+                    {[item.size, item.color].filter(Boolean).join(" / ") ||
+                      "Standard"}
                     {" · "}Qty {item.quantity}
                   </p>
                 </div>
@@ -137,6 +125,16 @@ async function ConfirmationContent({ params }: Props) {
               <strong>{money(order.deliveryFee.toFixed(2))}</strong>
             </div>
 
+            {order.discount.gt(0) && (
+              <div className="cart-summary-row checkout-discount">
+                <span>
+                  Coupon
+                  {order.couponCode ? ` (${order.couponCode})` : ""}
+                </span>
+                <strong>−{money(order.discount.toFixed(2))}</strong>
+              </div>
+            )}
+
             <div className="cart-summary-row checkout-total">
               <strong>Total</strong>
               <strong>{money(order.total.toFixed(2))}</strong>
@@ -144,10 +142,7 @@ async function ConfirmationContent({ params }: Props) {
           </aside>
         </div>
 
-        <Link
-          href="/shop"
-          className="primary-button order-continue"
-        >
+        <Link href="/shop" className="primary-button order-continue">
           Continue shopping
         </Link>
       </section>
@@ -158,11 +153,7 @@ async function ConfirmationContent({ params }: Props) {
 export default function OrderConfirmationPage(props: Props) {
   return (
     <Suspense
-      fallback={
-        <div className="store-loading">
-          Opening your order...
-        </div>
-      }
+      fallback={<div className="store-loading">Opening your order...</div>}
     >
       <ConfirmationContent {...props} />
     </Suspense>

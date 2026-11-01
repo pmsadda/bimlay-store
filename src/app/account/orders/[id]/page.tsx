@@ -52,6 +52,8 @@ async function OrderContent({ params }: Props) {
       notes: true,
       subtotal: true,
       deliveryFee: true,
+      discount: true,
+      couponCode: true,
       total: true,
       createdAt: true,
       items: {
@@ -77,11 +79,7 @@ async function OrderContent({ params }: Props) {
   const categories = await getStoreCategories();
 
   return (
-    <Storefront
-      mode="account"
-      categories={categories}
-      products={[]}
-    >
+    <Storefront mode="account" categories={categories} products={[]}>
       <section className="shell customer-account">
         <Link href="/account" className="text-link">
           Back to your orders
@@ -107,7 +105,9 @@ async function OrderContent({ params }: Props) {
         <div className="customer-settings-grid">
           <section className="customer-settings-card">
             <h2>Delivery details</h2>
-            <p><strong>{order.customerName}</strong></p>
+            <p>
+              <strong>{order.customerName}</strong>
+            </p>
             <p>{order.phone}</p>
             <p className="order-address">{order.address}</p>
             <p>{order.district}</p>
@@ -119,9 +119,7 @@ async function OrderContent({ params }: Props) {
               </>
             )}
 
-            <p className="category-help">
-              Payment: Cash on Delivery
-            </p>
+            <p className="category-help">Payment: Cash on Delivery</p>
 
             <p className="category-help">
               Payment status: {label(order.paymentStatus)}
@@ -141,6 +139,16 @@ async function OrderContent({ params }: Props) {
               <strong>{money(order.deliveryFee.toFixed(2))}</strong>
             </div>
 
+            {order.discount.gt(0) && (
+              <div className="cart-summary-row checkout-discount">
+                <span>
+                  Coupon
+                  {order.couponCode ? ` (${order.couponCode})` : ""}
+                </span>
+                <strong>−{money(order.discount.toFixed(2))}</strong>
+              </div>
+            )}
+
             <div className="cart-summary-row checkout-total">
               <strong>Total</strong>
               <strong>{money(order.total.toFixed(2))}</strong>
@@ -152,10 +160,7 @@ async function OrderContent({ params }: Props) {
           <h2>Ordered items</h2>
 
           {order.items.map((item) => (
-            <article
-              key={item.id}
-              className="customer-order-item"
-            >
+            <article key={item.id} className="customer-order-item">
               {item.imageUrl && (
                 <Image
                   src={item.imageUrl}
@@ -174,18 +179,14 @@ async function OrderContent({ params }: Props) {
                     "Standard"}
                 </p>
 
-                <p className="category-help">
-                  SKU: {item.sku}
-                </p>
+                <p className="category-help">SKU: {item.sku}</p>
 
                 <p className="category-help">
                   Qty {item.quantity} × {money(item.unitPrice.toFixed(2))}
                 </p>
               </div>
 
-              <strong>
-                {money(item.lineTotal.toFixed(2))}
-              </strong>
+              <strong>{money(item.lineTotal.toFixed(2))}</strong>
             </article>
           ))}
         </section>
@@ -197,11 +198,7 @@ async function OrderContent({ params }: Props) {
 export default function CustomerOrderPage(props: Props) {
   return (
     <Suspense
-      fallback={
-        <div className="store-loading">
-          Opening order details...
-        </div>
-      }
+      fallback={<div className="store-loading">Opening order details...</div>}
     >
       <OrderContent {...props} />
     </Suspense>

@@ -34,10 +34,7 @@ export default async function AdminOrderDetails({
     include: {
       items: true,
       audits: {
-        orderBy: [
-          { createdAt: "desc" },
-          { id: "desc" },
-        ],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       },
     },
   });
@@ -61,10 +58,19 @@ export default async function AdminOrderDetails({
         Back to orders
       </Link>
 
+      <Link
+        href={`/admin/orders/${order.id}/invoice`}
+        className="product-small-button product-new-link"
+      >
+        View / print invoice
+      </Link>
+
       <div className="order-detail-grid">
         <section className="category-panel">
           <h2>Customer & delivery</h2>
-          <p><strong>{order.customerName}</strong></p>
+          <p>
+            <strong>{order.customerName}</strong>
+          </p>
           <p>{order.phone}</p>
           {order.email && <p>{order.email}</p>}
           <p className="order-address">{order.address}</p>
@@ -107,6 +113,16 @@ export default async function AdminOrderDetails({
             <strong>৳ {order.deliveryFee.toFixed(2)}</strong>
           </div>
 
+          {order.discount.gt(0) && (
+            <div className="order-summary-line checkout-discount">
+              <span>
+                Coupon
+                {order.couponCode ? ` (${order.couponCode})` : ""}
+              </span>
+              <strong>−৳ {order.discount.toFixed(2)}</strong>
+            </div>
+          )}
+
           <div className="order-summary-line">
             <span>Total</span>
             <strong>৳ {order.total.toFixed(2)}</strong>
@@ -114,17 +130,13 @@ export default async function AdminOrderDetails({
 
           {order.stockReleasedAt && (
             <p className="category-help">
-              Stock restoration processed on{" "}
-              {dateLabel(order.stockReleasedAt)}.
+              Stock restoration processed on {dateLabel(order.stockReleasedAt)}.
               See history for restored quantities.
             </p>
           )}
 
           {order.paymentStatus === "PAID" &&
-            (
-              order.status === "CANCELLED" ||
-              order.status === "RETURNED"
-            ) && (
+            (order.status === "CANCELLED" || order.status === "RETURNED") && (
               <p className="cart-item-issue">
                 Payment is still marked Paid. Review whether a refund is due.
               </p>
@@ -188,17 +200,13 @@ export default async function AdminOrderDetails({
               {audit.actorEmail} · {dateLabel(audit.createdAt)}
             </p>
 
-            {audit.note && (
-              <p className="order-address">{audit.note}</p>
-            )}
+            {audit.note && <p className="order-address">{audit.note}</p>}
           </article>
         ))}
 
         <article className="order-audit">
           <strong>Order placed</strong>
-          <p className="category-help">
-            {dateLabel(order.createdAt)}
-          </p>
+          <p className="category-help">{dateLabel(order.createdAt)}</p>
         </article>
       </section>
     </>

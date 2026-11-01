@@ -1,11 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import ProductGallery from "@/components/product-gallery";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Heart, ShoppingBag } from "lucide-react";
 import { validateCartItem } from "@/app/actions/cart";
 import { getCartQuantity, setCartQuantity } from "@/lib/cart-store";
+import ProductShare from "@/components/product-share";
 import {
   readWishlistIds,
   toggleWishlist,
@@ -53,7 +54,7 @@ export default function ProductDetail({
     product.variants[0];
 
   const [selectedId, setSelectedId] = useState(firstAvailable.id);
-  const [imageIndex, setImageIndex] = useState(0);
+  
   const [quantity, setQuantity] = useState("1");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -65,7 +66,7 @@ export default function ProductDetail({
   const variant =
     product.variants.find((item) => item.id === selectedId) ?? firstAvailable;
 
-  const image = product.images[imageIndex] ?? product.images[0];
+  
 
   function addToBag() {
     setError("");
@@ -119,41 +120,7 @@ export default function ProductDetail({
       </nav>
 
       <div className="product-detail-grid">
-        <section aria-label="Product gallery">
-          <div className="detail-main-image">
-            <Image
-              src={image.url}
-              alt={image.alt}
-              fill
-              unoptimized
-              priority
-              sizes="(max-width: 760px) 100vw, 50vw"
-            />
-          </div>
-
-          {product.images.length > 1 && (
-            <div className="detail-thumbnails">
-              {product.images.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={index === imageIndex ? "selected" : ""}
-                  onClick={() => setImageIndex(index)}
-                  aria-label={`View product image ${index + 1}`}
-                  aria-pressed={index === imageIndex}
-                >
-                  <Image
-                    src={item.url}
-                    alt={item.alt}
-                    width={90}
-                    height={110}
-                    unoptimized
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+     <ProductGallery images={product.images} />
 
         <section className="detail-information">
           <p className="eyebrow">{product.category.name}</p>
@@ -272,6 +239,9 @@ export default function ProductDetail({
           <p className="detail-note">
             Final availability and pricing are confirmed at checkout.
           </p>
+
+          <ProductShare />
+          
 
           <section className="detail-description">
             <h2>Product details</h2>
