@@ -1,7 +1,12 @@
+
+
 import Storefront from "@/components/storefront";
 import { db } from "@/lib/db";
 import { getHeroSlides } from "@/lib/hero-slides";
 import { getHomeSections } from "@/lib/home-sections";
+
+// লাইভ ডেটা ফেচিংয়ের জন্য Next.js-এর নতুন নিয়ম
+export const instant = false;
 
 export default async function HomePage() {
   const [heroSlides, homeSections, rawCategories, featuredProducts] = await Promise.all([
