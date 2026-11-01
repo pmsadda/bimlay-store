@@ -159,13 +159,6 @@ export default function Storefront({
     return () => window.clearInterval(timer);
   }, [mode, categoryCount]);
 
-  <h2>
-    {mode === "home"
-      ? "Featured Picks"
-      : (categories.find((category) => category.slug === selectedCategory)
-          ?.name ?? "Shop all products")}
-  </h2>;
-
   function categoryHref(slug: string) {
     return `/shop?category=${encodeURIComponent(slug)}`;
   }
@@ -641,115 +634,115 @@ export default function Storefront({
                 )}
               </nav>
             )}
+
+            {/* Category-Wise Product Grids */}
+            {mode === "home" &&
+              categoryProducts &&
+              categoryProducts.length > 0 &&
+              categoryProducts.map(({ category, products: catProducts }) => {
+                if (!catProducts || catProducts.length === 0) return null;
+
+                return (
+                  <div
+                    key={category.id}
+                    className="category-showcase-block"
+                    style={{ marginTop: "3.5rem" }}
+                  >
+                    <div className="section-heading">
+                      <div>
+                        <h2>{category.name}</h2>
+                        <p>
+                          Explore our latest {category.name.toLowerCase()}{" "}
+                          collection
+                        </p>
+                      </div>
+
+                      <Link
+                        href={categoryHref(category.slug)}
+                        className="text-link"
+                      >
+                        View all <ArrowRight size={14} />
+                      </Link>
+                    </div>
+
+                    <div className="product-grid">
+                      {catProducts.map((product) => {
+                        const isSaved = saved.includes(product.id);
+
+                        return (
+                          <article key={product.id}>
+                            <div className="product-image">
+                              <Link
+                                href={`/products/${product.slug}`}
+                                aria-label={`View ${product.name}`}
+                              >
+                                <Image
+                                  src={product.image}
+                                  alt={product.imageAlt}
+                                  fill
+                                  unoptimized
+                                  sizes="(max-width: 640px) 50vw, 25vw"
+                                />
+                              </Link>
+
+                              <button
+                                type="button"
+                                className="icon-button wishlist-button"
+                                aria-label={
+                                  isSaved
+                                    ? `Unsave ${product.name}`
+                                    : `Save ${product.name}`
+                                }
+                                aria-pressed={isSaved}
+                                onClick={() => toggleSaved(product.id)}
+                              >
+                                <Heart
+                                  size={17}
+                                  strokeWidth={1.5}
+                                  fill={isSaved ? "#816334" : "none"}
+                                  color={isSaved ? "#816334" : "currentColor"}
+                                />
+                              </button>
+
+                              {!product.inStock && (
+                                <span className="store-stock-label">
+                                  Out of stock
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="product-info">
+                              <div>
+                                <h3>
+                                  <Link href={`/products/${product.slug}`}>
+                                    {product.name}
+                                  </Link>
+                                </h3>
+
+                                <p>
+                                  {product.hasMultipleVariants && (
+                                    <span className="store-from">From </span>
+                                  )}
+
+                                  {money(product.price)}
+
+                                  {product.regularPrice && (
+                                    <del className="store-regular-price">
+                                      {money(product.regularPrice)}
+                                    </del>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
           </section>
         )}
-
-        {/* Category-Wise Product Grids */}
-        {mode === "home" &&
-          categoryProducts &&
-          categoryProducts.length > 0 &&
-          categoryProducts.map(({ category, products: catProducts }) => {
-            if (!catProducts || catProducts.length === 0) return null;
-
-            return (
-              <div
-                key={category.id}
-                className="category-showcase-block"
-                style={{ marginTop: "3.5rem" }}
-              >
-                <div className="section-heading">
-                  <div>
-                    <h2>{category.name}</h2>
-                    <p>
-                      Explore our latest {category.name.toLowerCase()}{" "}
-                      collection
-                    </p>
-                  </div>
-
-                  <Link
-                    href={categoryHref(category.slug)}
-                    className="text-link"
-                  >
-                    View all <ArrowRight size={14} />
-                  </Link>
-                </div>
-
-                <div className="product-grid">
-                  {catProducts.map((product) => {
-                    const isSaved = saved.includes(product.id);
-
-                    return (
-                      <article key={product.id}>
-                        <div className="product-image">
-                          <Link
-                            href={`/products/${product.slug}`}
-                            aria-label={`View ${product.name}`}
-                          >
-                            <Image
-                              src={product.image}
-                              alt={product.imageAlt}
-                              fill
-                              unoptimized
-                              sizes="(max-width: 640px) 50vw, 25vw"
-                            />
-                          </Link>
-
-                          <button
-                            type="button"
-                            className="icon-button wishlist-button"
-                            aria-label={
-                              isSaved
-                                ? `Unsave ${product.name}`
-                                : `Save ${product.name}`
-                            }
-                            aria-pressed={isSaved}
-                            onClick={() => toggleSaved(product.id)}
-                          >
-                            <Heart
-                              size={17}
-                              strokeWidth={1.5}
-                              fill={isSaved ? "#816334" : "none"}
-                              color={isSaved ? "#816334" : "currentColor"}
-                            />
-                          </button>
-
-                          {!product.inStock && (
-                            <span className="store-stock-label">
-                              Out of stock
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="product-info">
-                          <div>
-                            <h3>
-                              <Link href={`/products/${product.slug}`}>
-                                {product.name}
-                              </Link>
-                            </h3>
-
-                            <p>
-                              {product.hasMultipleVariants && (
-                                <span className="store-from">From </span>
-                              )}
-
-                              {money(product.price)}
-
-                              {product.regularPrice && (
-                                <del className="store-regular-price">
-                                  {money(product.regularPrice)}
-                                </del>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
 
         {mode === "home" && <HomeStory sections={homeSections} />}
       </main>
