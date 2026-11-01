@@ -6,6 +6,14 @@ import { db } from "@/lib/db";
 import { getStoreCategories } from "@/lib/catalog";
 import Storefront from "@/components/storefront";
 import ProductDetail from "@/components/product-detail";
+import { JsonLd } from "@/components/json-ld";
+import {
+  absoluteUrl,
+  breadcrumbSchema,
+  productSchema,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -63,10 +71,7 @@ const getProduct = cache(async (slug: string) => {
       },
       variants: {
         where: { isActive: true },
-        orderBy: [
-          { price: "asc" },
-          { id: "asc" },
-        ],
+        orderBy: [{ price: "asc" }, { id: "asc" }],
         select: {
           id: true,
           sku: true,
@@ -75,8 +80,8 @@ const getProduct = cache(async (slug: string) => {
           price: true,
           compareAtPrice: true,
           stock: true,
-          flashPrice: true,      // ⚡ নতুন
-          flashSaleEnd: true,    // ⚡ নতুন
+          flashPrice: true,
+          flashSaleEnd: true,
         },
       },
       reviews: {
@@ -115,22 +120,39 @@ export async function generateMetadata({
     product.shortDescription ||
     `Discover ${product.name} at BIMLAY.`;
 
+  const mainImage = product.images[0]?.url ?? "/branding/bimlay-logo.png";
+  const canonical = `/products/${product.slug}`;
+
   return {
     title,
     description,
-    alternates: {
-      canonical: `/products/${product.slug}`,
-    },
+    alternates: { canonical },
+    keywords: [
+      product.name,
+      product.category.name,
+      "BIMLAY",
+      "buy online Bangladesh",
+    ],
     openGraph: {
+      type: "website",
       title,
       description,
-      url: `/products/${product.slug}`,
+      url: canonical,
+      siteName: SITE_NAME,
       images: [
         {
-          url: product.images[0].url,
-          alt: product.images[0].alt,
+          url: absoluteUrl(mainImage),
+          alt: product.images[0]?.alt || product.name,
+          width: 1200,
+          height: 1200,
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [absoluteUrl(mainImage)],
     },
   };
 }
@@ -155,6 +177,44 @@ async function ProductContent({ params }: PageProps) {
       categories={categories}
       products={[]}
     >
+      <JsonLd
+        data={[
+          productSchema({
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            shortDescription: product.shortDescription,
+            category: product.category.name,
+            images: product.images.map((img) => ({
+              url: img.url,
+              alt: img.alt,
+            })),
+            variants: product.variants.map((v) => ({
+              sku: v.sku,
+              price: v.price.toFixed(2),
+              stock: v.stock,
+            })),
+            reviews: product.reviews.map((r) => ({
+              userName: r.userName,
+              rating: r.rating,
+              comment: r.comment,
+              createdAt: r.createdAt.toISOString(),
+            })),
+          }),
+          breadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Shop", url: "/shop" },
+            {
+              name: product.category.name,
+              url: `/shop?category=${product.category.slug}`,
+            },
+            {
+              name: product.name,
+              url: `/products/${product.slug}`,
+            },
+          ]),
+        ]}
+      />
       <ProductDetail
         product={{
           id: product.id,
@@ -171,8 +231,8 @@ async function ProductContent({ params }: PageProps) {
             price: variant.price.toFixed(2),
             regularPrice:
               variant.compareAtPrice?.toFixed(2) ?? null,
-            flashPrice: variant.flashPrice?.toFixed(2) ?? null,          // ⚡ নতুন
-            flashSaleEnd: variant.flashSaleEnd?.toISOString() ?? null,   // ⚡ নতুন
+            flashPrice: variant.flashPrice?.toFixed(2) ?? null,
+            flashSaleEnd: variant.flashSaleEnd?.toISOString() ?? null,
             stock: variant.stock,
           })),
           reviews: (product.reviews || []).map((rev) => ({

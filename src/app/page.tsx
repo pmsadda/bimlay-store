@@ -3,6 +3,11 @@ import Storefront from "@/components/storefront";
 import { db } from "@/lib/db";
 import { getHeroSlides } from "@/lib/hero-slides";
 import { getHomeSections } from "@/lib/home-sections";
+import { JsonLd } from "@/components/json-ld";
+import {
+  organizationSchema,
+  websiteSchema,
+} from "@/lib/seo";
 
 export const instant = false;
 
@@ -204,15 +209,37 @@ export default async function HomePage() {
     };
   });
 
+    const settings = await db.storeSetting.findUnique({
+    where: { id: "main" },
+    select: {
+      supportPhone: true,
+      supportEmail: true,
+      facebookPageUrl: true,
+    },
+  });
+
   return (
-    <Storefront
-      mode="home"
-      categories={categories}
-      products={allProducts}
-      categoryProducts={categoryProducts}
-      flashProducts={flashProducts}
-      heroSlides={heroSlides}
-      homeSections={homeSections}
-    />
+    <>
+      <JsonLd
+        data={[
+          organizationSchema({
+            logoUrl: "/branding/bimlay-logo.png",
+            phone: settings?.supportPhone ?? null,
+            email: settings?.supportEmail ?? null,
+            facebookUrl: settings?.facebookPageUrl ?? null,
+          }),
+          websiteSchema(),
+        ]}
+      />
+         <Storefront
+        mode="home"
+        categories={categories}
+        products={allProducts}
+        categoryProducts={categoryProducts}
+        flashProducts={flashProducts}
+        heroSlides={heroSlides}
+        homeSections={homeSections}
+      />
+    </>
   );
 }
