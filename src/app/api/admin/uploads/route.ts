@@ -3,8 +3,6 @@ import sharp, { type OutputInfo } from "sharp";
 import { getAdmin } from "@/lib/admin-auth";
 import { saveMediaImage } from "@/lib/media-storage";
 
-
-
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_REQUEST_BYTES = 10 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
@@ -17,18 +15,52 @@ const ALLOWED_MIME_TYPES = new Set([
 
 class UploadTooLargeError extends Error {}
 
-async function readLimitedFormData(
-  request: Request,
-): Promise<FormData> {
+function isAllowedOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true; // Direct/same-origin server-side request
+
+  // Render Environment Variable চেক
+  if (process.env.APP_ORIGIN && origin === process.env.APP_ORIGIN) {
+    return true;
+  }
+
+  try {
+    const originUrl = new URL(origin);
+    const hostHeader =
+      request.headers.get("x-forwarded-host") ??
+      request.headers.get("host") ??
+      new URL(request.url).host;
+
+    // একই হোস্টের রিকোয়েস্ট হলে এলাউ করবে
+    if (originUrl.host === hostHeader) {
+      return true;
+    }
+
+    // bimlay.com এবং এর সাবডোমেইন এলাউ করতে
+    if (
+      originUrl.hostname === "bimlay.com" ||
+      originUrl.hostname.endsWith(".bimlay.com") ||
+      originUrl.hostname === "localhost" ||
+      originUrl.hostname === "127.0.0.1" ||
+      originUrl.hostname.endsWith(".onrender.com")
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
+async function readLimitedFormData(request: Request): Promise<FormData> {
   const contentType = request.headers.get("content-type") ?? "";
 
   if (!contentType.toLowerCase().startsWith("multipart/form-data;")) {
     throw new Error("Invalid upload request.");
   }
 
-  const declaredSize = Number(
-    request.headers.get("content-length") ?? 0,
-  );
+  const declaredSize = Number(request.headers.get("content-length") ?? 0);
 
   if (declaredSize > MAX_REQUEST_BYTES) {
     throw new UploadTooLargeError();
@@ -79,10 +111,7 @@ async function readLimitedFormData(
 }
 
 export async function POST(request: Request) {
-  const expectedOrigin =
-    process.env.APP_ORIGIN ?? new URL(request.url).origin;
-
-  if (request.headers.get("origin") !== expectedOrigin) {
+  if (!isAllowedOrigin(request)) {
     return Response.json(
       { error: "Upload origin is not allowed." },
       { status: 403 },
@@ -140,10 +169,10 @@ export async function POST(request: Request) {
     );
   }
 
- let processed: {
-  data: Buffer;
-  info: OutputInfo;
-};
+  let processed: {
+    data: Buffer;
+    info: OutputInfo;
+  };
 
   try {
     const input = Buffer.from(await file.arrayBuffer());
@@ -190,13 +219,13 @@ export async function POST(request: Request) {
   const filename = `${randomUUID()}.webp`;
 
   try {
-  await saveMediaImage(filename, processed.data);
-} catch {
-  return Response.json(
-    { error: "Could not save the image. Please try again." },
-    { status: 500 },
-  );
-}
+    await saveMediaImage(filename, processed.data);
+  } catch {
+    return Response.json(
+      { error: "Could not save the image. Please try again." },
+      { status: 500 },
+    );
+  }
 
   return Response.json(
     {
