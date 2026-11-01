@@ -602,16 +602,31 @@ export default function Storefront({
                         </h3>
 
                         <p>
-                          {product.hasMultipleVariants && (
-                            <span className="store-from">From </span>
-                          )}
-
-                          {money(product.price)}
-
-                          {product.regularPrice && (
-                            <del className="store-regular-price">
-                              {money(product.regularPrice)}
-                            </del>
+                          {product.flashPrice && product.flashSaleEnd ? (
+                            <>
+                              {product.hasMultipleVariants && (
+                                <span className="store-from">From </span>
+                              )}
+                              <strong className="flash-price">
+                                {money(product.flashPrice)}
+                              </strong>{" "}
+                              <del className="store-regular-price">
+                                {money(product.price)}
+                              </del>
+                              <span className="flash-badge">⚡ FLASH</span>
+                            </>
+                          ) : (
+                            <>
+                              {product.hasMultipleVariants && (
+                                <span className="store-from">From </span>
+                              )}
+                              {money(product.price)}
+                              {product.regularPrice && (
+                                <del className="store-regular-price">
+                                  {money(product.regularPrice)}
+                                </del>
+                              )}
+                            </>
                           )}
                         </p>
                       </div>
@@ -720,16 +735,34 @@ export default function Storefront({
                                 </h3>
 
                                 <p>
-                                  {product.hasMultipleVariants && (
-                                    <span className="store-from">From </span>
-                                  )}
-
-                                  {money(product.price)}
-
-                                  {product.regularPrice && (
-                                    <del className="store-regular-price">
-                                      {money(product.regularPrice)}
-                                    </del>
+                                  {product.flashPrice &&
+                                  product.flashSaleEnd ? (
+                                    <>
+                                      {product.hasMultipleVariants && (
+                                        <span className="store-from">
+                                          From{" "}
+                                        </span>
+                                      )}
+                                     <strong className="flash-price">{money(product.flashPrice)}</strong>
+                                      <del className="store-regular-price">
+                                        {money(product.price)}
+                                      </del>
+                                      <span className="flash-badge">⚡ FLASH</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      {product.hasMultipleVariants && (
+                                        <span className="store-from">
+                                          From{" "}
+                                        </span>
+                                      )}
+                                      {money(product.price)}
+                                      {product.regularPrice && (
+                                        <del className="store-regular-price">
+                                          {money(product.regularPrice)}
+                                        </del>
+                                      )}
+                                    </>
                                   )}
                                 </p>
                               </div>

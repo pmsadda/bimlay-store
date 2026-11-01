@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
-
 import { mediaImageExists } from "@/lib/media-storage";
 
 export type ProductEditState = {
@@ -42,6 +41,8 @@ type NewVariantInput = {
   price: Prisma.Decimal;
   compareAtPrice: Prisma.Decimal | null;
   stock: number;
+  flashPrice: Prisma.Decimal | null;
+  flashSaleEnd: Date | null;
   isActive: boolean;
 };
 
@@ -75,6 +76,8 @@ function parseNewVariants(formData: FormData): NewVariantInput[] {
       typeof item.price !== "string" ||
       typeof item.compareAtPrice !== "string" ||
       typeof item.stock !== "string" ||
+      typeof item.flashPrice !== "string" ||
+      typeof item.flashSaleEnd !== "string" ||
       typeof item.isActive !== "boolean"
     ) {
       throw new ProductEditError(`New variant ${index + 1}: invalid data.`);
@@ -86,6 +89,8 @@ function parseNewVariants(formData: FormData): NewVariantInput[] {
     const price = priceValue(item.price.trim());
     const regularText = item.compareAtPrice.trim();
     const stockText = item.stock.trim();
+    const flashPriceText = item.flashPrice.trim();
+    const flashSaleEndText = item.flashSaleEnd.trim();
 
     if (!/^[A-Z0-9][A-Z0-9_-]{0,63}$/.test(sku)) {
       throw new ProductEditError(
@@ -113,6 +118,33 @@ function parseNewVariants(formData: FormData): NewVariantInput[] {
       );
     }
 
+    const flashPrice = flashPriceText ? priceValue(flashPriceText) : null;
+    const flashSaleEnd = flashSaleEndText ? new Date(flashSaleEndText) : null;
+
+    if ((flashPrice && !flashSaleEnd) || (!flashPrice && flashSaleEnd)) {
+      throw new ProductEditError(
+        `New variant ${index + 1}: flash price and end time must both be filled or both empty.`,
+      );
+    }
+
+    if (flashSaleEnd && Number.isNaN(flashSaleEnd.getTime())) {
+      throw new ProductEditError(
+        `New variant ${index + 1}: invalid flash sale end time.`,
+      );
+    }
+
+    if (flashPrice && flashPrice.gte(price)) {
+      throw new ProductEditError(
+        `New variant ${index + 1}: flash price must be lower than selling price.`,
+      );
+    }
+
+    if (flashSaleEnd && flashSaleEnd.getTime() <= Date.now()) {
+      throw new ProductEditError(
+        `New variant ${index + 1}: flash sale end time must be in the future.`,
+      );
+    }
+
     return {
       sku,
       size: size || null,
@@ -120,6 +152,8 @@ function parseNewVariants(formData: FormData): NewVariantInput[] {
       price,
       compareAtPrice,
       stock: Number(stockText),
+      flashPrice,
+      flashSaleEnd,
       isActive: item.isActive,
     };
   });
@@ -303,28 +337,28 @@ export async function updateProduct(
   try {
     const newVariants = parseNewVariants(formData);
     const submittedImages = parseSubmittedImages(formData, status);
-
     const originalImageIds = parseOriginalImageIds(formData);
 
-   for (const image of submittedImages) {
-  if (!image.url) continue;
+    for (const image of submittedImages) {
+      if (!image.url) continue;
 
-  let exists: boolean;
+      let exists: boolean;
 
-  try {
-    exists = await mediaImageExists(image.url);
-  } catch {
-    throw new ProductEditError(
-      "Could not verify an uploaded image. Please try again.",
-    );
-  }
+      try {
+        exists = await mediaImageExists(image.url);
+      } catch {
+        throw new ProductEditError(
+          "Could not verify an uploaded image. Please try again.",
+        );
+      }
 
-  if (!exists) {
-    throw new ProductEditError(
-      "An uploaded image is missing. Upload it again.",
-    );
-  }
-}
+      if (!exists) {
+        throw new ProductEditError(
+          "An uploaded image is missing. Upload it again.",
+        );
+      }
+    }
+
     await db.$transaction(
       async (tx) => {
         const product = await tx.product.findUnique({
@@ -341,12 +375,11 @@ export async function updateProduct(
             },
             images: {
               orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-              select: {
-                id: true,
-              },
+              select: { id: true },
             },
           },
         });
+
         if (!product) {
           throw new ProductEditError("Product was not found.");
         }
@@ -428,13 +461,11 @@ export async function updateProduct(
           );
         }
 
+        // ⚡ একটাই map — flash ফিল্ড সহ
         const updates = product.variants.map((variant) => {
           const price = priceValue(text(formData, `price-${variant.id}`));
-
           const regularText = text(formData, `regular-${variant.id}`);
-
           const compareAtPrice = regularText ? priceValue(regularText) : null;
-
           const stockText = text(formData, `stock-${variant.id}`);
 
           if (!/^\d{1,7}$/.test(stockText) || Number(stockText) > 1000000) {
@@ -449,12 +480,48 @@ export async function updateProduct(
             );
           }
 
+          const flashPriceText = text(formData, `flashPrice-${variant.id}`);
+          const flashSaleEndText = text(formData, `flashSaleEnd-${variant.id}`);
+
+          const flashPrice = flashPriceText
+            ? priceValue(flashPriceText)
+            : null;
+          const flashSaleEnd = flashSaleEndText
+            ? new Date(flashSaleEndText)
+            : null;
+
+          if ((flashPrice && !flashSaleEnd) || (!flashPrice && flashSaleEnd)) {
+            throw new ProductEditError(
+              `${variant.sku}: flash price and end time must both be filled or both empty.`,
+            );
+          }
+
+          if (flashSaleEnd && Number.isNaN(flashSaleEnd.getTime())) {
+            throw new ProductEditError(
+              `${variant.sku}: invalid flash sale end time.`,
+            );
+          }
+
+          if (flashPrice && flashPrice.gte(price)) {
+            throw new ProductEditError(
+              `${variant.sku}: flash price must be lower than selling price.`,
+            );
+          }
+
+          if (flashSaleEnd && flashSaleEnd.getTime() <= Date.now()) {
+            throw new ProductEditError(
+              `${variant.sku}: flash sale end time must be in the future.`,
+            );
+          }
+
           return {
             id: variant.id,
             price,
             compareAtPrice,
             stock: Number(stockText),
             isActive: formData.get(`active-${variant.id}`) === "on",
+            flashPrice,
+            flashSaleEnd,
           };
         });
 
@@ -488,6 +555,8 @@ export async function updateProduct(
               compareAtPrice: variant.compareAtPrice,
               stock: variant.stock,
               isActive: variant.isActive,
+              flashPrice: variant.flashPrice,
+              flashSaleEnd: variant.flashSaleEnd,
             },
           });
         }
@@ -503,6 +572,8 @@ export async function updateProduct(
               compareAtPrice: variant.compareAtPrice,
               stock: variant.stock,
               isActive: variant.isActive,
+              flashPrice: variant.flashPrice,
+              flashSaleEnd: variant.flashSaleEnd,
             },
           });
         }
@@ -551,14 +622,14 @@ export async function updateProduct(
     }
 
     if (
-  error instanceof Prisma.PrismaClientKnownRequestError &&
-  error.code === "P2002"
-) {
-  return {
-    error: "This SKU is already used by another product.",
-    success: "",
-  };
-}
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return {
+        error: "This SKU is already used by another product.",
+        success: "",
+      };
+    }
 
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&

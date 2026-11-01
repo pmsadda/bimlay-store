@@ -29,12 +29,14 @@ export type AggregateProductVariant = {
 export type ProductVariantAvgAggregateOutputType = {
   price: runtime.Decimal | null
   compareAtPrice: runtime.Decimal | null
+  flashPrice: runtime.Decimal | null
   stock: number | null
 }
 
 export type ProductVariantSumAggregateOutputType = {
   price: runtime.Decimal | null
   compareAtPrice: runtime.Decimal | null
+  flashPrice: runtime.Decimal | null
   stock: number | null
 }
 
@@ -46,6 +48,8 @@ export type ProductVariantMinAggregateOutputType = {
   colorHex: string | null
   price: runtime.Decimal | null
   compareAtPrice: runtime.Decimal | null
+  flashPrice: runtime.Decimal | null
+  flashSaleEnd: Date | null
   stock: number | null
   isActive: boolean | null
   createdAt: Date | null
@@ -61,6 +65,8 @@ export type ProductVariantMaxAggregateOutputType = {
   colorHex: string | null
   price: runtime.Decimal | null
   compareAtPrice: runtime.Decimal | null
+  flashPrice: runtime.Decimal | null
+  flashSaleEnd: Date | null
   stock: number | null
   isActive: boolean | null
   createdAt: Date | null
@@ -76,6 +82,8 @@ export type ProductVariantCountAggregateOutputType = {
   colorHex: number
   price: number
   compareAtPrice: number
+  flashPrice: number
+  flashSaleEnd: number
   stock: number
   isActive: number
   createdAt: number
@@ -88,12 +96,14 @@ export type ProductVariantCountAggregateOutputType = {
 export type ProductVariantAvgAggregateInputType = {
   price?: true
   compareAtPrice?: true
+  flashPrice?: true
   stock?: true
 }
 
 export type ProductVariantSumAggregateInputType = {
   price?: true
   compareAtPrice?: true
+  flashPrice?: true
   stock?: true
 }
 
@@ -105,6 +115,8 @@ export type ProductVariantMinAggregateInputType = {
   colorHex?: true
   price?: true
   compareAtPrice?: true
+  flashPrice?: true
+  flashSaleEnd?: true
   stock?: true
   isActive?: true
   createdAt?: true
@@ -120,6 +132,8 @@ export type ProductVariantMaxAggregateInputType = {
   colorHex?: true
   price?: true
   compareAtPrice?: true
+  flashPrice?: true
+  flashSaleEnd?: true
   stock?: true
   isActive?: true
   createdAt?: true
@@ -135,6 +149,8 @@ export type ProductVariantCountAggregateInputType = {
   colorHex?: true
   price?: true
   compareAtPrice?: true
+  flashPrice?: true
+  flashSaleEnd?: true
   stock?: true
   isActive?: true
   createdAt?: true
@@ -237,6 +253,8 @@ export type ProductVariantGroupByOutputType = {
   colorHex: string | null
   price: runtime.Decimal
   compareAtPrice: runtime.Decimal | null
+  flashPrice: runtime.Decimal | null
+  flashSaleEnd: Date | null
   stock: number
   isActive: boolean
   createdAt: Date
@@ -275,6 +293,8 @@ export type ProductVariantWhereInput = {
   colorHex?: Prisma.StringNullableFilter<"ProductVariant"> | string | null
   price?: Prisma.DecimalFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.DateTimeNullableFilter<"ProductVariant"> | Date | string | null
   stock?: Prisma.IntFilter<"ProductVariant"> | number
   isActive?: Prisma.BoolFilter<"ProductVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductVariant"> | Date | string
@@ -292,6 +312,8 @@ export type ProductVariantOrderByWithRelationInput = {
   colorHex?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  flashPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  flashSaleEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   stock?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -312,6 +334,8 @@ export type ProductVariantWhereUniqueInput = Prisma.AtLeast<{
   colorHex?: Prisma.StringNullableFilter<"ProductVariant"> | string | null
   price?: Prisma.DecimalFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.DateTimeNullableFilter<"ProductVariant"> | Date | string | null
   stock?: Prisma.IntFilter<"ProductVariant"> | number
   isActive?: Prisma.BoolFilter<"ProductVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductVariant"> | Date | string
@@ -329,6 +353,8 @@ export type ProductVariantOrderByWithAggregationInput = {
   colorHex?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  flashPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  flashSaleEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   stock?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -352,6 +378,8 @@ export type ProductVariantScalarWhereWithAggregatesInput = {
   colorHex?: Prisma.StringNullableWithAggregatesFilter<"ProductVariant"> | string | null
   price?: Prisma.DecimalWithAggregatesFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.DecimalNullableWithAggregatesFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.DecimalNullableWithAggregatesFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.DateTimeNullableWithAggregatesFilter<"ProductVariant"> | Date | string | null
   stock?: Prisma.IntWithAggregatesFilter<"ProductVariant"> | number
   isActive?: Prisma.BoolWithAggregatesFilter<"ProductVariant"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProductVariant"> | Date | string
@@ -367,6 +395,8 @@ export type ProductVariantCreateInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -383,6 +413,8 @@ export type ProductVariantUncheckedCreateInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -399,6 +431,8 @@ export type ProductVariantUpdateInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +449,8 @@ export type ProductVariantUncheckedUpdateInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -431,6 +467,8 @@ export type ProductVariantCreateManyInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -446,6 +484,8 @@ export type ProductVariantUpdateManyMutationInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -460,6 +500,8 @@ export type ProductVariantUncheckedUpdateManyInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -485,6 +527,8 @@ export type ProductVariantCountOrderByAggregateInput = {
   colorHex?: Prisma.SortOrder
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrder
+  flashPrice?: Prisma.SortOrder
+  flashSaleEnd?: Prisma.SortOrder
   stock?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -495,6 +539,7 @@ export type ProductVariantCountOrderByAggregateInput = {
 export type ProductVariantAvgOrderByAggregateInput = {
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrder
+  flashPrice?: Prisma.SortOrder
   stock?: Prisma.SortOrder
 }
 
@@ -506,6 +551,8 @@ export type ProductVariantMaxOrderByAggregateInput = {
   colorHex?: Prisma.SortOrder
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrder
+  flashPrice?: Prisma.SortOrder
+  flashSaleEnd?: Prisma.SortOrder
   stock?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,6 +568,8 @@ export type ProductVariantMinOrderByAggregateInput = {
   colorHex?: Prisma.SortOrder
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrder
+  flashPrice?: Prisma.SortOrder
+  flashSaleEnd?: Prisma.SortOrder
   stock?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -531,6 +580,7 @@ export type ProductVariantMinOrderByAggregateInput = {
 export type ProductVariantSumOrderByAggregateInput = {
   price?: Prisma.SortOrder
   compareAtPrice?: Prisma.SortOrder
+  flashPrice?: Prisma.SortOrder
   stock?: Prisma.SortOrder
 }
 
@@ -597,6 +647,10 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type ProductVariantCreateNestedOneWithoutOrderItemsInput = {
   create?: Prisma.XOR<Prisma.ProductVariantCreateWithoutOrderItemsInput, Prisma.ProductVariantUncheckedCreateWithoutOrderItemsInput>
   connectOrCreate?: Prisma.ProductVariantCreateOrConnectWithoutOrderItemsInput
@@ -621,6 +675,8 @@ export type ProductVariantCreateWithoutProductInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -636,6 +692,8 @@ export type ProductVariantUncheckedCreateWithoutProductInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -680,6 +738,8 @@ export type ProductVariantScalarWhereInput = {
   colorHex?: Prisma.StringNullableFilter<"ProductVariant"> | string | null
   price?: Prisma.DecimalFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.DecimalNullableFilter<"ProductVariant"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.DateTimeNullableFilter<"ProductVariant"> | Date | string | null
   stock?: Prisma.IntFilter<"ProductVariant"> | number
   isActive?: Prisma.BoolFilter<"ProductVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductVariant"> | Date | string
@@ -695,6 +755,8 @@ export type ProductVariantCreateWithoutOrderItemsInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -710,6 +772,8 @@ export type ProductVariantUncheckedCreateWithoutOrderItemsInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -741,6 +805,8 @@ export type ProductVariantUpdateWithoutOrderItemsInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -756,6 +822,8 @@ export type ProductVariantUncheckedUpdateWithoutOrderItemsInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -771,6 +839,8 @@ export type ProductVariantCreateManyProductInput = {
   colorHex?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Date | string | null
   stock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -785,6 +855,8 @@ export type ProductVariantUpdateWithoutProductInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -800,6 +872,8 @@ export type ProductVariantUncheckedUpdateWithoutProductInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -815,6 +889,8 @@ export type ProductVariantUncheckedUpdateManyWithoutProductInput = {
   colorHex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   compareAtPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  flashSaleEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -860,6 +936,8 @@ export type ProductVariantSelect<ExtArgs extends runtime.Types.Extensions.Intern
   colorHex?: boolean
   price?: boolean
   compareAtPrice?: boolean
+  flashPrice?: boolean
+  flashSaleEnd?: boolean
   stock?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -878,6 +956,8 @@ export type ProductVariantSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   colorHex?: boolean
   price?: boolean
   compareAtPrice?: boolean
+  flashPrice?: boolean
+  flashSaleEnd?: boolean
   stock?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -894,6 +974,8 @@ export type ProductVariantSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   colorHex?: boolean
   price?: boolean
   compareAtPrice?: boolean
+  flashPrice?: boolean
+  flashSaleEnd?: boolean
   stock?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -910,6 +992,8 @@ export type ProductVariantSelectScalar = {
   colorHex?: boolean
   price?: boolean
   compareAtPrice?: boolean
+  flashPrice?: boolean
+  flashSaleEnd?: boolean
   stock?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -917,7 +1001,7 @@ export type ProductVariantSelectScalar = {
   productId?: boolean
 }
 
-export type ProductVariantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sku" | "size" | "color" | "colorHex" | "price" | "compareAtPrice" | "stock" | "isActive" | "createdAt" | "updatedAt" | "productId", ExtArgs["result"]["productVariant"]>
+export type ProductVariantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sku" | "size" | "color" | "colorHex" | "price" | "compareAtPrice" | "flashPrice" | "flashSaleEnd" | "stock" | "isActive" | "createdAt" | "updatedAt" | "productId", ExtArgs["result"]["productVariant"]>
 export type ProductVariantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   orderItems?: boolean | Prisma.ProductVariant$orderItemsArgs<ExtArgs>
@@ -944,6 +1028,8 @@ export type $ProductVariantPayload<ExtArgs extends runtime.Types.Extensions.Inte
     colorHex: string | null
     price: runtime.Decimal
     compareAtPrice: runtime.Decimal | null
+    flashPrice: runtime.Decimal | null
+    flashSaleEnd: Date | null
     stock: number
     isActive: boolean
     createdAt: Date
@@ -1381,6 +1467,8 @@ export interface ProductVariantFieldRefs {
   readonly colorHex: Prisma.FieldRef<"ProductVariant", 'String'>
   readonly price: Prisma.FieldRef<"ProductVariant", 'Decimal'>
   readonly compareAtPrice: Prisma.FieldRef<"ProductVariant", 'Decimal'>
+  readonly flashPrice: Prisma.FieldRef<"ProductVariant", 'Decimal'>
+  readonly flashSaleEnd: Prisma.FieldRef<"ProductVariant", 'DateTime'>
   readonly stock: Prisma.FieldRef<"ProductVariant", 'Int'>
   readonly isActive: Prisma.FieldRef<"ProductVariant", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ProductVariant", 'DateTime'>

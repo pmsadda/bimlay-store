@@ -10,6 +10,8 @@ type NewVariant = {
   price: string;
   compareAtPrice: string;
   stock: string;
+  flashPrice: string;
+  flashSaleEnd: string;
   isActive: boolean;
 };
 
@@ -36,6 +38,8 @@ export default function NewVariantEditor({
         price: "",
         compareAtPrice: "",
         stock: "0",
+        flashPrice: "",
+        flashSaleEnd: "",
         isActive: true,
       },
     ]);
@@ -47,22 +51,18 @@ export default function NewVariantEditor({
   ) {
     setVariants((current) =>
       current.map((variant) =>
-        variant.key === key
-          ? { ...variant, ...changes }
-          : variant,
+        variant.key === key ? { ...variant, ...changes } : variant,
       ),
     );
   }
 
   return (
     <section className="category-panel">
-      <h2 className="product-section-title">
-        Add size or colour variants
-      </h2>
+      <h2 className="product-section-title">Add size or colour variants</h2>
 
       <p className="category-help">
-        Existing variants stay above. Add up to 12 variants in
-        total. Every SKU and size/colour combination must be unique.
+        Existing variants stay above. Add up to 12 variants in total.
+        Every SKU and size/colour combination must be unique.
       </p>
 
       <input
@@ -76,6 +76,8 @@ export default function NewVariantEditor({
             price: variant.price,
             compareAtPrice: variant.compareAtPrice,
             stock: variant.stock,
+            flashPrice: variant.flashPrice,
+            flashSaleEnd: variant.flashSaleEnd,
             isActive: variant.isActive,
           })),
         )}
@@ -85,16 +87,11 @@ export default function NewVariantEditor({
         <div className="product-variant" key={variant.key}>
           <div className="product-variant-heading">
             <h3>New variant {index + 1}</h3>
-
             <button
               type="button"
               className="product-small-button"
               onClick={() =>
-                setVariants((current) =>
-                  current.filter(
-                    (item) => item.key !== variant.key,
-                  ),
-                )
+                setVariants((current) => current.filter((item) => item.key !== variant.key))
               }
             >
               Remove
@@ -106,11 +103,7 @@ export default function NewVariantEditor({
               <span>Unique SKU</span>
               <input
                 value={variant.sku}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    sku: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { sku: event.target.value })}
                 maxLength={64}
                 placeholder="BIMLAY-SHIRT-BLK-M"
                 required
@@ -121,11 +114,7 @@ export default function NewVariantEditor({
               <span>Size - optional</span>
               <input
                 value={variant.size}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    size: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { size: event.target.value })}
                 maxLength={40}
                 placeholder="M"
               />
@@ -135,11 +124,7 @@ export default function NewVariantEditor({
               <span>Colour - optional</span>
               <input
                 value={variant.color}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    color: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { color: event.target.value })}
                 maxLength={60}
                 placeholder="Black"
               />
@@ -153,11 +138,7 @@ export default function NewVariantEditor({
                 max="9999999999.99"
                 step="0.01"
                 value={variant.price}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    price: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { price: event.target.value })}
                 required
               />
             </label>
@@ -170,11 +151,7 @@ export default function NewVariantEditor({
                 max="9999999999.99"
                 step="0.01"
                 value={variant.compareAtPrice}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    compareAtPrice: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { compareAtPrice: event.target.value })}
               />
             </label>
 
@@ -186,12 +163,31 @@ export default function NewVariantEditor({
                 max="1000000"
                 step="1"
                 value={variant.stock}
-                onChange={(event) =>
-                  changeVariant(variant.key, {
-                    stock: event.target.value,
-                  })
-                }
+                onChange={(event) => changeVariant(variant.key, { stock: event.target.value })}
                 required
+              />
+            </label>
+
+            {/* ⚡ FLASH SALE — নতুন */}
+            <label>
+              <span>⚡ Flash sale price (৳) — optional</span>
+              <input
+                type="number"
+                min="0.01"
+                max="9999999999.99"
+                step="0.01"
+                value={variant.flashPrice}
+                onChange={(event) => changeVariant(variant.key, { flashPrice: event.target.value })}
+                placeholder="Sale price"
+              />
+            </label>
+
+            <label>
+              <span>⚡ Flash sale শেষ সময় — optional</span>
+              <input
+                type="datetime-local"
+                value={variant.flashSaleEnd}
+                onChange={(event) => changeVariant(variant.key, { flashSaleEnd: event.target.value })}
               />
             </label>
           </div>
@@ -200,11 +196,7 @@ export default function NewVariantEditor({
             <input
               type="checkbox"
               checked={variant.isActive}
-              onChange={(event) =>
-                changeVariant(variant.key, {
-                  isActive: event.target.checked,
-                })
-              }
+              onChange={(event) => changeVariant(variant.key, { isActive: event.target.checked })}
             />
             <span>Active variant</span>
           </label>
@@ -221,9 +213,7 @@ export default function NewVariantEditor({
       </button>
 
       {existingCount + variants.length >= 12 && (
-        <p className="category-help">
-          Maximum of 12 variants reached.
-        </p>
+        <p className="category-help">Maximum of 12 variants reached.</p>
       )}
     </section>
   );

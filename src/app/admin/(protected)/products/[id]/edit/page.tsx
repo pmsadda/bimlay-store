@@ -101,6 +101,10 @@ export default async function EditProductPage({
             compareAtPrice: variant.compareAtPrice?.toFixed(2) ?? "",
             stock: variant.stock,
             isActive: variant.isActive,
+            flashPrice: variant.flashPrice?.toFixed(2) ?? "",
+            flashSaleEnd: variant.flashSaleEnd
+              ? new Date(variant.flashSaleEnd).toISOString().slice(0, 16)
+              : "",
           })),
         }}
         categories={categories.map((category) => {

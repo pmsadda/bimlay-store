@@ -130,6 +130,8 @@ export const ProductVariantScalarFieldEnum = {
   colorHex: 'colorHex',
   price: 'price',
   compareAtPrice: 'compareAtPrice',
+  flashPrice: 'flashPrice',
+  flashSaleEnd: 'flashSaleEnd',
   stock: 'stock',
   isActive: 'isActive',
   createdAt: 'createdAt',

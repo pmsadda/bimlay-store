@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import ProductGallery from "@/components/product-gallery";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Heart, ShoppingBag } from "lucide-react";
 import { validateCartItem } from "@/app/actions/cart";
 import { getCartQuantity, setCartQuantity } from "@/lib/cart-store";
 import ProductShare from "@/components/product-share";
 import { addProductReview } from "@/app/actions/reviews";
+import FlashTimer from "@/components/flash-timer";
 import {
   readWishlistIds,
   toggleWishlist,
@@ -35,6 +37,8 @@ export type ProductDetailData = {
     color: string;
     price: string;
     regularPrice: string | null;
+    flashPrice?: string | null;
+    flashSaleEnd?: string | null;
     stock: number;
   }[];
   reviews?: {
@@ -71,10 +75,28 @@ export default function ProductDetail({
   const [pending, startTransition] = useTransition();
   const wishlistSnapshot = useWishlistSnapshot();
 
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const timeoutId = setTimeout(tick, 0);
+    const intervalId = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, []);
+
   const isSaved = readWishlistIds(wishlistSnapshot).includes(product.id);
 
   const variant =
     product.variants.find((item) => item.id === selectedId) ?? firstAvailable;
+
+  const isFlashActive =
+    Boolean(variant.flashPrice && variant.flashSaleEnd) &&
+    now !== null &&
+    variant.flashSaleEnd !== null &&
+    variant.flashSaleEnd !== undefined &&
+    new Date(variant.flashSaleEnd).getTime() > now;
 
   function addToBag() {
     setError("");
@@ -135,8 +157,47 @@ export default function ProductDetail({
           <h1>{product.name}</h1>
 
           <div className="detail-price">
-            <strong>{money(variant.price)}</strong>
-            {variant.regularPrice && <del>{money(variant.regularPrice)}</del>}
+            {isFlashActive && variant.flashSaleEnd ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+                >
+                  <strong
+                    className="flash-price"
+                    style={{ fontSize: "1.5rem" }}
+                  >
+                    {money(variant.flashPrice!)}
+                  </strong>
+                  <del style={{ color: "#888", fontSize: "1.1rem" }}>
+                    {money(variant.price)}
+                  </del>
+                  <span
+                    className="flash-badge"
+                    style={{
+                      padding: "0.2rem 0.5rem",
+                      borderRadius: 4,
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    ⚡ FLASH SALE
+                  </span>
+                </div>
+                <FlashTimer endTime={variant.flashSaleEnd} />
+              </div>
+            ) : (
+              <>
+                <strong>{money(variant.price)}</strong>
+                {variant.regularPrice && (
+                  <del>{money(variant.regularPrice)}</del>
+                )}
+              </>
+            )}
           </div>
 
           <button
@@ -236,7 +297,6 @@ export default function ProductDetail({
             {success && (
               <div className="category-success detail-message">
                 <p>{success}</p>
-
                 <Link href="/cart" className="text-link">
                   View bag
                 </Link>
@@ -300,9 +360,12 @@ export default function ProductDetail({
                     )}
                     {review.imageUrl && (
                       <div style={{ marginTop: "0.5rem" }}>
-                        <img
+                        <Image
                           src={review.imageUrl}
                           alt="Review attachment"
+                          width={80}
+                          height={80}
+                          unoptimized
                           style={{
                             width: "80px",
                             height: "80px",

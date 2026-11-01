@@ -82,6 +82,8 @@ export async function getWishlistProducts(
             price: true,
             compareAtPrice: true,
             stock: true,
+            flashPrice: true,
+            flashSaleEnd: true,
           },
         },
       },
@@ -106,6 +108,14 @@ export async function getWishlistProducts(
         product.variants.find((item) => item.stock > 0) ??
         product.variants[0];
 
+            const now = new Date();
+      const flashVariant = product.variants.find(
+        (v) =>
+          v.flashPrice &&
+          v.flashSaleEnd &&
+          new Date(v.flashSaleEnd) > now,
+      );
+
       products.push({
         id: product.id,
         name: product.name,
@@ -116,6 +126,9 @@ export async function getWishlistProducts(
         price: variant.price.toFixed(2),
         regularPrice:
           variant.compareAtPrice?.toFixed(2) ?? null,
+        flashPrice: flashVariant?.flashPrice?.toFixed(2) ?? null,
+        flashSaleEnd:
+          flashVariant?.flashSaleEnd?.toISOString() ?? null,
         inStock: product.variants.some(
           (item) => item.stock > 0,
         ),

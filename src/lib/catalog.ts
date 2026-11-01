@@ -212,6 +212,8 @@ export async function getStoreProducts({
           price: true,
           compareAtPrice: true,
           stock: true,
+          flashPrice: true,     
+          flashSaleEnd: true,
         },
       },
     },
@@ -233,11 +235,19 @@ export async function getStoreProducts({
     total,
     currentPage,
     totalPages,
-    products: products.map((product) => {
+      products: products.map((product) => {
       const variant = priceSort
         ? product.variants[0]
         : product.variants.find((item) => item.stock > 0) ??
           product.variants[0];
+
+      const now = new Date();
+      const flashVariant = product.variants.find(
+        (v) =>
+          v.flashPrice &&
+          v.flashSaleEnd &&
+          new Date(v.flashSaleEnd) > now,
+      );
 
       return {
         id: product.id,
@@ -249,6 +259,10 @@ export async function getStoreProducts({
         price: variant.price.toFixed(2),
         regularPrice:
           variant.compareAtPrice?.toFixed(2) ?? null,
+        flashPrice:
+          flashVariant?.flashPrice?.toFixed(2) ?? null,        
+        flashSaleEnd:
+          flashVariant?.flashSaleEnd?.toISOString() ?? null,  
         inStock: product.variants.some(
           (item) => item.stock > 0,
         ),

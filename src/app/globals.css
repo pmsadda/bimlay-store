@@ -2877,3 +2877,57 @@ scroll-snap-align: start;
 html:has(.bimlay-image-dialog[open]) {
   overflow: hidden;
 }
+
+/* ⚡ Flash sale blink animation — bulletproof */
+@keyframes flash-blink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes flash-bg-blink {
+  0%, 49% {
+    background-color: #dc2626;
+    color: #ffffff;
+  }
+  50%, 100% {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.flash-badge {
+  display: inline-block !important;
+  margin-left: 6px;
+  padding: 2px 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 3px;
+  vertical-align: middle;
+  animation: flash-bg-blink 0.8s step-end infinite !important;
+}
+
+.flash-price {
+  color: #dc2626 !important;
+  font-weight: 700;
+  animation: flash-blink 0.8s step-end infinite !important;
+}
+
+/* Fix Next.js Image fill warnings */
+.product-image,
+.detail-main-image,
+.hero-art,
+.hero-slider-art,
+.home-category-media,
+.campaign,
+.story-image,
+.cart-item-image,
+.bimlay-image-preview,
+.product-edit-image-preview {
+  position: relative;
+}

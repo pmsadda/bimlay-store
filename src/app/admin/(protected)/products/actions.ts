@@ -131,58 +131,98 @@ export async function createProduct(
       throw new ProductInputError("Choose Draft or Active.");
     }
 
-    const variants = readArray(formData, "variants", 12).map(
-      (item, index) => {
-        const value = objectValue(item);
+   const variants = readArray(formData, "variants", 12).map(
+  (item, index) => {
+    const value = objectValue(item);
 
-        const sku = stringValue(value.sku).toUpperCase();
-        const size = stringValue(value.size);
-        const color = stringValue(value.color);
-        const price = parsePrice(stringValue(value.price));
-        const compareText = stringValue(value.compareAtPrice);
-        const stockText = stringValue(value.stock);
+    const sku = stringValue(value.sku).toUpperCase();
+    const size = stringValue(value.size);
+    const color = stringValue(value.color);
+    const price = parsePrice(stringValue(value.price));
+    const compareText = stringValue(value.compareAtPrice);
+    const stockText = stringValue(value.stock);
 
-        if (!/^[A-Z0-9][A-Z0-9_-]{0,63}$/.test(sku)) {
-          throw new ProductInputError(
-            `Variant ${index + 1}: enter an SKU using English letters, numbers, hyphens or underscores.`,
-          );
-        }
+    if (!/^[A-Z0-9][A-Z0-9_-]{0,63}$/.test(sku)) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: enter an SKU using English letters, numbers, hyphens or underscores.`,
+      );
+    }
 
-        if (size.length > 40 || color.length > 60) {
-          throw new ProductInputError(
-            `Variant ${index + 1}: size or colour is too long.`,
-          );
-        }
+    if (size.length > 40 || color.length > 60) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: size or colour is too long.`,
+      );
+    }
 
-        if (
-          !/^\d{1,7}$/.test(stockText) ||
-          Number(stockText) > 1000000
-        ) {
-          throw new ProductInputError(
-            `Variant ${index + 1}: stock must be a whole number from 0 to 1000000.`,
-          );
-        }
+    if (
+      !/^\d{1,7}$/.test(stockText) ||
+      Number(stockText) > 1000000
+    ) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: stock must be a whole number from 0 to 1000000.`,
+      );
+    }
 
-        const compareAtPrice = compareText
-          ? parsePrice(compareText)
-          : null;
+    const compareAtPrice = compareText
+      ? parsePrice(compareText)
+      : null;
 
-        if (compareAtPrice && compareAtPrice.lte(price)) {
-          throw new ProductInputError(
-            `Variant ${index + 1}: regular price must be higher than selling price, or left empty.`,
-          );
-        }
+    if (compareAtPrice && compareAtPrice.lte(price)) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: regular price must be higher than selling price, or left empty.`,
+      );
+    }
 
-        return {
-          sku,
-          size: size || null,
-          color: color || null,
-          price,
-          compareAtPrice,
-          stock: Number(stockText),
-        };
-      },
-    );
+    // ⚡ FLASH SALE parse + validate
+    const flashPriceText = stringValue(value.flashPrice);
+    const flashSaleEndText = stringValue(value.flashSaleEnd);
+
+    const flashPrice = flashPriceText
+      ? parsePrice(flashPriceText)
+      : null;
+    const flashSaleEnd = flashSaleEndText
+      ? new Date(flashSaleEndText)
+      : null;
+
+    if (
+      (flashPrice && !flashSaleEnd) ||
+      (!flashPrice && flashSaleEnd)
+    ) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: flash price and end time must both be filled or both empty.`,
+      );
+    }
+
+    if (flashSaleEnd && Number.isNaN(flashSaleEnd.getTime())) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: enter a valid flash sale end time.`,
+      );
+    }
+
+    if (flashPrice && flashPrice.gte(price)) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: flash price must be lower than the selling price.`,
+      );
+    }
+
+    if (flashSaleEnd && flashSaleEnd.getTime() <= Date.now()) {
+      throw new ProductInputError(
+        `Variant ${index + 1}: flash sale end time must be in the future.`,
+      );
+    }
+
+    return {
+      sku,
+      size: size || null,
+      color: color || null,
+      price,
+      compareAtPrice,
+      stock: Number(stockText),
+      flashPrice,
+      flashSaleEnd,
+    };
+  },
+);
 
     if (new Set(variants.map((variant) => variant.sku)).size !== variants.length) {
       throw new ProductInputError("Each variant must have a different SKU.");

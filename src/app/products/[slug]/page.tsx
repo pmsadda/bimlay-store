@@ -75,6 +75,8 @@ const getProduct = cache(async (slug: string) => {
           price: true,
           compareAtPrice: true,
           stock: true,
+          flashPrice: true,      // ⚡ নতুন
+          flashSaleEnd: true,    // ⚡ নতুন
         },
       },
       reviews: {
@@ -169,6 +171,8 @@ async function ProductContent({ params }: PageProps) {
             price: variant.price.toFixed(2),
             regularPrice:
               variant.compareAtPrice?.toFixed(2) ?? null,
+            flashPrice: variant.flashPrice?.toFixed(2) ?? null,          // ⚡ নতুন
+            flashSaleEnd: variant.flashSaleEnd?.toISOString() ?? null,   // ⚡ নতুন
             stock: variant.stock,
           })),
           reviews: (product.reviews || []).map((rev) => ({

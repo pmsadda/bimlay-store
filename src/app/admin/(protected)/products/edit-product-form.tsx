@@ -29,6 +29,8 @@ type ProductEditData = {
     compareAtPrice: string;
     stock: number;
     isActive: boolean;
+    flashPrice: string;
+    flashSaleEnd: string;
   }[];
 };
 
@@ -181,6 +183,28 @@ export default function EditProductForm({
                     max="9999999999.99"
                     step="0.01"
                     defaultValue={variant.compareAtPrice}
+                  />
+                </label>
+                {/* ⚡ FLASH SALE — নতুন */}
+                <label>
+                  <span>⚡ Flash sale price (৳) — optional</span>
+                  <input
+                    name={`flashPrice-${variant.id}`}
+                    type="number"
+                    min="0.01"
+                    max="9999999999.99"
+                    step="0.01"
+                    defaultValue={variant.flashPrice}
+                    placeholder="Sale price"
+                  />
+                </label>
+
+                <label>
+                  <span>⚡ Flash sale শেষ সময় — optional</span>
+                  <input
+                    name={`flashSaleEnd-${variant.id}`}
+                    type="datetime-local"
+                    defaultValue={variant.flashSaleEnd}
                   />
                 </label>
 

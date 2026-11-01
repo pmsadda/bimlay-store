@@ -19,6 +19,8 @@ type Variant = {
   price: string;
   compareAtPrice: string;
   stock: string;
+  flashPrice: string;
+  flashSaleEnd: string;
 };
 
 type ProductImage = {
@@ -34,6 +36,8 @@ function emptyVariant(key: number): Variant {
     price: "",
     compareAtPrice: "",
     stock: "0",
+    flashPrice: "",
+    flashSaleEnd: "",
   };
 }
 
@@ -42,17 +46,13 @@ export default function ProductForm({
 }: {
   categories: CategoryOption[];
 }) {
-  const [state, formAction, pending] = useActionState(
-    createProduct,
-    { error: "" },
-  );
+  const [state, formAction, pending] = useActionState(createProduct, {
+    error: "",
+  });
 
   const nextKey = useRef(1);
 
-  const [variants, setVariants] = useState<Variant[]>([
-    emptyVariant(0),
-  ]);
-
+  const [variants, setVariants] = useState<Variant[]>([emptyVariant(0)]);
   const [images, setImages] = useState<ProductImage[]>([]);
 
   function updateVariant(
@@ -62,9 +62,7 @@ export default function ProductForm({
   ) {
     setVariants((current) =>
       current.map((variant) =>
-        variant.key === key
-          ? { ...variant, [field]: value }
-          : variant,
+        variant.key === key ? { ...variant, [field]: value } : variant,
       ),
     );
   }
@@ -72,83 +70,44 @@ export default function ProductForm({
   function addVariant() {
     const key = nextKey.current;
     nextKey.current += 1;
-
-    setVariants((current) => [
-      ...current,
-      emptyVariant(key),
-    ]);
+    setVariants((current) => [...current, emptyVariant(key)]);
   }
 
   function moveImageUp(index: number) {
     if (index === 0) return;
-
     setImages((current) => {
       const updated = [...current];
-      [updated[index - 1], updated[index]] = [
-        updated[index],
-        updated[index - 1],
-      ];
+      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
       return updated;
     });
   }
 
   return (
     <form action={formAction} className="product-editor">
-      <input
-        type="hidden"
-        name="variants"
-        value={JSON.stringify(variants)}
-      />
-
-      <input
-        type="hidden"
-        name="images"
-        value={JSON.stringify(images)}
-      />
+      <input type="hidden" name="variants" value={JSON.stringify(variants)} />
+      <input type="hidden" name="images" value={JSON.stringify(images)} />
 
       <fieldset disabled={pending}>
         <section className="category-panel">
-          <h2 className="product-section-title">
-            Product information
-          </h2>
+          <h2 className="product-section-title">Product information</h2>
 
           <div className="category-form-grid">
             <label>
               <span>Product name</span>
-              <input
-                name="name"
-                placeholder="Premium Cotton Shirt"
-                minLength={2}
-                maxLength={180}
-                required
-              />
+              <input name="name" placeholder="Premium Cotton Shirt" minLength={2} maxLength={180} required />
             </label>
 
             <label>
               <span>URL slug</span>
-              <input
-                name="slug"
-                placeholder="premium-cotton-shirt"
-                minLength={2}
-                maxLength={180}
-                pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                autoCapitalize="none"
-                spellCheck={false}
-                required
-              />
+              <input name="slug" placeholder="premium-cotton-shirt" minLength={2} maxLength={180} pattern="[a-z0-9]+(-[a-z0-9]+)*" autoCapitalize="none" spellCheck={false} required />
             </label>
 
             <label>
               <span>Category</span>
               <select name="categoryId" defaultValue="" required>
-                <option value="" disabled>
-                  Choose a category
-                </option>
-
+                <option value="" disabled>Choose a category</option>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
+                  <option key={category.id} value={category.id}>{category.name}</option>
                 ))}
               </select>
             </label>
@@ -163,22 +122,12 @@ export default function ProductForm({
 
             <label className="category-full-width">
               <span>Short description</span>
-              <textarea
-                name="shortDescription"
-                rows={2}
-                maxLength={300}
-                placeholder="A short introduction to the product"
-              />
+              <textarea name="shortDescription" rows={2} maxLength={300} placeholder="A short introduction to the product" />
             </label>
 
             <label className="category-full-width">
               <span>Full description</span>
-              <textarea
-                name="description"
-                rows={6}
-                maxLength={10000}
-                placeholder="Material, fit, care instructions and product details"
-              />
+              <textarea name="description" rows={6} maxLength={10000} placeholder="Material, fit, care instructions and product details" />
             </label>
           </div>
 
@@ -200,37 +149,13 @@ export default function ProductForm({
             <div className="product-image-selection">
               {images.map((image, index) => (
                 <div className="product-selected-image" key={image.url}>
-                  <Image
-                    src={image.url}
-                    alt={`Selected product image ${index + 1}`}
-                    width={180}
-                    height={180}
-                    unoptimized
-                  />
-
-                  <span>
-                    {index === 0 ? "Main image" : `Image ${index + 1}`}
-                  </span>
-
+                  <Image src={image.url} alt={`Selected product image ${index + 1}`} width={180} height={180} unoptimized />
+                  <span>{index === 0 ? "Main image" : `Image ${index + 1}`}</span>
                   <div className="product-image-controls">
-                    <button
-                      type="button"
-                      disabled={index === 0}
-                      onClick={() => moveImageUp(index)}
-                      aria-label={`Move image ${index + 1} earlier`}
-                    >
+                    <button type="button" disabled={index === 0} onClick={() => moveImageUp(index)} aria-label={`Move image ${index + 1} earlier`}>
                       <ArrowUp size={15} />
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setImages((current) =>
-                          current.filter((item) => item.url !== image.url),
-                        )
-                      }
-                      aria-label={`Remove image ${index + 1}`}
-                    >
+                    <button type="button" onClick={() => setImages((current) => current.filter((item) => item.url !== image.url))} aria-label={`Remove image ${index + 1}`}>
                       <X size={15} />
                     </button>
                   </div>
@@ -243,13 +168,9 @@ export default function ProductForm({
             <ImageUpload
               onUploaded={(uploaded) =>
                 setImages((current) => {
-                  if (
-                    current.length >= 8 ||
-                    current.some((item) => item.url === uploaded.url)
-                  ) {
+                  if (current.length >= 8 || current.some((item) => item.url === uploaded.url)) {
                     return current;
                   }
-
                   return [...current, { url: uploaded.url }];
                 })
               }
@@ -258,9 +179,7 @@ export default function ProductForm({
         </section>
 
         <section className="category-panel">
-          <h2 className="product-section-title">
-            Variants, pricing & stock
-          </h2>
+          <h2 className="product-section-title">Variants, pricing & stock</h2>
 
           <p className="category-help">
             Create one variant for each size and colour combination.
@@ -271,16 +190,11 @@ export default function ProductForm({
             <div className="product-variant" key={variant.key}>
               <div className="product-variant-heading">
                 <h3>Variant {index + 1}</h3>
-
                 {variants.length > 1 && (
                   <button
                     type="button"
                     className="product-small-button"
-                    onClick={() =>
-                      setVariants((current) =>
-                        current.filter((item) => item.key !== variant.key),
-                      )
-                    }
+                    onClick={() => setVariants((current) => current.filter((item) => item.key !== variant.key))}
                   >
                     Remove
                   </button>
@@ -292,9 +206,7 @@ export default function ProductForm({
                   <span>SKU — unique stock code</span>
                   <input
                     value={variant.sku}
-                    onChange={(event) =>
-                      updateVariant(variant.key, "sku", event.target.value)
-                    }
+                    onChange={(event) => updateVariant(variant.key, "sku", event.target.value)}
                     placeholder="BIM-SHIRT-WHT-M"
                     maxLength={64}
                     required
@@ -305,9 +217,7 @@ export default function ProductForm({
                   <span>Size — optional</span>
                   <input
                     value={variant.size}
-                    onChange={(event) =>
-                      updateVariant(variant.key, "size", event.target.value)
-                    }
+                    onChange={(event) => updateVariant(variant.key, "size", event.target.value)}
                     placeholder="M"
                     maxLength={40}
                   />
@@ -317,9 +227,7 @@ export default function ProductForm({
                   <span>Colour — optional</span>
                   <input
                     value={variant.color}
-                    onChange={(event) =>
-                      updateVariant(variant.key, "color", event.target.value)
-                    }
+                    onChange={(event) => updateVariant(variant.key, "color", event.target.value)}
                     placeholder="White"
                     maxLength={60}
                   />
@@ -333,9 +241,7 @@ export default function ProductForm({
                     max={1000000}
                     step={1}
                     value={variant.stock}
-                    onChange={(event) =>
-                      updateVariant(variant.key, "stock", event.target.value)
-                    }
+                    onChange={(event) => updateVariant(variant.key, "stock", event.target.value)}
                     required
                   />
                 </label>
@@ -348,9 +254,7 @@ export default function ProductForm({
                     max="9999999999.99"
                     step="0.01"
                     value={variant.price}
-                    onChange={(event) =>
-                      updateVariant(variant.key, "price", event.target.value)
-                    }
+                    onChange={(event) => updateVariant(variant.key, "price", event.target.value)}
                     placeholder="1800"
                     required
                   />
@@ -364,26 +268,43 @@ export default function ProductForm({
                     max="9999999999.99"
                     step="0.01"
                     value={variant.compareAtPrice}
-                    onChange={(event) =>
-                      updateVariant(
-                        variant.key,
-                        "compareAtPrice",
-                        event.target.value,
-                      )
-                    }
+                    onChange={(event) => updateVariant(variant.key, "compareAtPrice", event.target.value)}
                     placeholder="2200"
                   />
                 </label>
+
+                {/* ⚡ FLASH SALE ফিল্ড — নতুন */}
+                <label>
+                  <span>⚡ Flash sale price (৳) — optional</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    max="9999999999.99"
+                    step="0.01"
+                    value={variant.flashPrice}
+                    onChange={(event) => updateVariant(variant.key, "flashPrice", event.target.value)}
+                    placeholder="Sale price (selling price-এর কম)"
+                  />
+                </label>
+
+                <label>
+                  <span>⚡ Flash sale শেষ সময় — optional</span>
+                  <input
+                    type="datetime-local"
+                    value={variant.flashSaleEnd}
+                    onChange={(event) => updateVariant(variant.key, "flashSaleEnd", event.target.value)}
+                  />
+                </label>
               </div>
+
+              <p className="category-help" style={{ marginTop: 10 }}>
+                ⚡ Flash price আর শেষ সময় — দুটোই দাও, বা দুটোই ফাঁকা রাখো।
+              </p>
             </div>
           ))}
 
           {variants.length < 12 && (
-            <button
-              type="button"
-              className="product-small-button"
-              onClick={addVariant}
-            >
+            <button type="button" className="product-small-button" onClick={addVariant}>
               <Plus size={15} />
               Add variant
             </button>
@@ -392,9 +313,7 @@ export default function ProductForm({
 
         <div aria-live="polite" aria-atomic="true">
           {state.error && (
-            <p className="admin-form-error product-save-error">
-              {state.error}
-            </p>
+            <p className="admin-form-error product-save-error">{state.error}</p>
           )}
         </div>
 
@@ -407,9 +326,7 @@ export default function ProductForm({
         </button>
 
         {images.length === 0 && (
-          <p className="category-help">
-            Upload at least one image to create this product.
-          </p>
+          <p className="category-help">Upload at least one image to create this product.</p>
         )}
       </fieldset>
     </form>
