@@ -68,7 +68,8 @@ export const ModelName = {
   CustomerAuthLimit: 'CustomerAuthLimit',
   HeroSlide: 'HeroSlide',
   HomeSection: 'HomeSection',
-  Coupon: 'Coupon'
+  Coupon: 'Coupon',
+  Review: 'Review'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -361,6 +362,20 @@ export const CouponScalarFieldEnum = {
 } as const
 
 export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
+
+
+export const ReviewScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  userId: 'userId',
+  userName: 'userName',
+  rating: 'rating',
+  comment: 'comment',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -107,3 +107,8 @@ export type HomeSection = Prisma.HomeSectionModel
  * 
  */
 export type Coupon = Prisma.CouponModel
+/**
+ * Model Review
+ * 
+ */
+export type Review = Prisma.ReviewModel

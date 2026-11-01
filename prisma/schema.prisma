@@ -52,6 +52,7 @@ model Product {
   variants   ProductVariant[]
   images     ProductImage[]
   orderItems OrderItem[]
+  reviews Review[]
 
   @@index([categoryId, status])
   @@index([status, isFeatured])
@@ -355,4 +356,16 @@ model Coupon {
   updatedAt       DateTime   @updatedAt
 
   orders Order[]
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  userName  String
+  rating    Int      // 1 theke 5 er moddhe rating
+  comment   String?
+  imageUrl  String?  // Photo ba media er jonno
+  createdAt DateTime @default(now())
 }

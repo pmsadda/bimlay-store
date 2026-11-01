@@ -77,6 +77,17 @@ const getProduct = cache(async (slug: string) => {
           stock: true,
         },
       },
+      reviews: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          userName: true,
+          rating: true,
+          comment: true,
+          imageUrl: true,
+          createdAt: true,
+        },
+      },
     },
   });
 });
@@ -159,6 +170,14 @@ async function ProductContent({ params }: PageProps) {
             regularPrice:
               variant.compareAtPrice?.toFixed(2) ?? null,
             stock: variant.stock,
+          })),
+          reviews: product.reviews.map((rev) => ({
+            id: rev.id,
+            userName: rev.userName,
+            rating: rev.rating,
+            comment: rev.comment ?? "",
+            imageUrl: rev.imageUrl ?? null,
+            createdAt: rev.createdAt.toISOString(),
           })),
         }}
       />
