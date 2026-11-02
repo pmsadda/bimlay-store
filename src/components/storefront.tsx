@@ -156,20 +156,38 @@ export default function Storefront({
   const categoryCarouselRef = useRef<HTMLDivElement>(null);
   const categoryCount = mainCategories.length;
 
-  useEffect(() => {
+   useEffect(() => {
     const track = categoryCarouselRef.current;
 
-    if (mode !== "home" || !track || categoryCount < 2) return;
+    if (mode !== "home" || !track) return;
 
-    const timer = window.setInterval(() => {
-      if (
-        document.visibilityState !== "visible" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-        track.matches(":hover") ||
-        track.contains(document.activeElement)
-      ) {
-        return;
-      }
+    // motion কমাতে চাইলে skip
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    let paused = false;
+
+    function pause() {
+      paused = true;
+    }
+
+    function resume() {
+      paused = false;
+    }
+
+    track.addEventListener("mouseenter", pause);
+    track.addEventListener("mouseleave", resume);
+    track.addEventListener("touchstart", pause, { passive: true });
+    track.addEventListener("touchend", resume, { passive: true });
+    track.addEventListener("focusin", pause);
+    track.addEventListener("focusout", resume);
+
+    // ⚡ প্রতি ৩ সেকেন্ডে পরের category-তে slide
+    const interval = window.setInterval(() => {
+      if (paused) return;
+      if (document.visibilityState !== "visible") return;
+      if (!track) return;
 
       const firstCard = track.querySelector<HTMLElement>(".home-category-card");
       if (!firstCard) return;
@@ -180,17 +198,27 @@ export default function Storefront({
 
       if (maxScroll < 4) return;
 
-      track.scrollTo({
-        left:
-          track.scrollLeft >= maxScroll - 3
-            ? 0
-            : Math.min(track.scrollLeft + step, maxScroll),
-        behavior: "smooth",
-      });
-    }, 4500);
+      // শেষে পৌঁছালে আবার শুরুতে
+      if (track.scrollLeft >= maxScroll - 3) {
+        track.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        track.scrollTo({
+          left: Math.min(track.scrollLeft + step, maxScroll),
+          behavior: "smooth",
+        });
+      }
+    }, 3000);
 
-    return () => window.clearInterval(timer);
-  }, [mode, categoryCount]);
+    return () => {
+      window.clearInterval(interval);
+      track.removeEventListener("mouseenter", pause);
+      track.removeEventListener("mouseleave", resume);
+      track.removeEventListener("touchstart", pause);
+      track.removeEventListener("touchend", resume);
+      track.removeEventListener("focusin", pause);
+      track.removeEventListener("focusout", resume);
+    };
+  }, [mode]);
 
   function categoryHref(slug: string) {
     return `/shop?category=${encodeURIComponent(slug)}`;

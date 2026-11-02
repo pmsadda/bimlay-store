@@ -2377,7 +2377,7 @@ body > .bimlay-floating-action {
   scrollbar-width: none;
   margin-top: 26px;
   padding: 24px 8px;
-  justify-content: center;
+  /* justify-content: center; ← সরানো হলো scroll ঠিক করার জন্য */
 }
 
 .home-category-grid::-webkit-scrollbar {
@@ -2416,35 +2416,8 @@ body > .bimlay-floating-action {
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
-  height: 100%;
   overflow: hidden;
   z-index: 0;
-}
-
-.home-category-media::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 38%,
-    rgb(20 18 16 / 72%) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.home-category-media {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
 }
 
 .home-category-img {
@@ -2456,6 +2429,7 @@ body > .bimlay-floating-action {
   object-fit: cover;
   object-position: center;
   display: block;
+  transition: transform 350ms ease;
 }
 
 .home-category-media::after {
@@ -2489,10 +2463,9 @@ body > .bimlay-floating-action {
   letter-spacing: 0.12em;
 }
 
-/* Caption inside hexagon — centered, narrower to avoid cut corners */
 .home-category-caption {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   right: 15%;
   bottom: 12%;
   left: 15%;
@@ -2511,6 +2484,7 @@ body > .bimlay-floating-action {
   flex-shrink: 0;
 }
 
+/* ══════ Tablet ══════ */
 @media (max-width: 900px) {
   .home-category-grid {
     gap: 10px;
@@ -2530,16 +2504,28 @@ body > .bimlay-floating-action {
   }
 }
 
+/* ══════ Mobile ══════ */
 @media (max-width: 640px) {
+  .home-category-section {
+    padding-top: 16px;
+  }
+
+  .home-category-grid {
+    gap: 10px;
+    padding: 16px 0;
+    /* justify-content: center; ← এখানেও সরানো */
+  }
+
   .home-category-card {
-    flex-basis: 68%;
-    height: clamp(200px, 58vw, 300px);
+    flex-basis: 72%;
+    height: clamp(220px, 72vw, 320px);
   }
 
   .home-category-caption {
-    right: 20%;
-    left: 20%;
-    font-size: 15px;
+    right: 18%;
+    left: 18%;
+    bottom: 10%;
+    font-size: 14px;
   }
 }
 
@@ -2547,25 +2533,6 @@ body > .bimlay-floating-action {
   .home-category-media img,
   .home-category-card {
     transition: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .home-category-card {
-    flex-basis: 76%;
-    height: clamp(320px, 95vw, 460px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-category-media img {
-    transition: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .home-category-section {
-    padding-top: 16px;
   }
 }
 
