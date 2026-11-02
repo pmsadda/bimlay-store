@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, connection } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { v2 as cloudinary } from "cloudinary";
@@ -25,6 +25,7 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ filename: string }> },
 ) {
+   await connection();
   const { filename } = await context.params;
 
   // ১. Filename validate — path traversal বা arbitrary file পড়া আটকাতে
