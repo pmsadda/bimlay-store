@@ -25,10 +25,10 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ filename: string }> },
 ) {
-   await connection();
+  await connection();
   const { filename } = await context.params;
 
-  // ১. Filename validate — path traversal বা arbitrary file পড়া আটকাতে
+  // ১. Filename validate
   if (!MEDIA_FILENAME_PATTERN.test(filename)) {
     return new NextResponse("Not found", { status: 404 });
   }
@@ -67,6 +67,23 @@ export async function GET(
       },
     });
   } catch (error) {
+    // 🚀 Fallback: লোকাল ফাইল না পেলে Cloudinary থেকে লোড করার চেষ্টা করবে
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ENOENT" &&
+      process.env.CLOUDINARY_CLOUD_NAME
+    ) {
+      const publicId = `bimlay/${filename.slice(0, -".webp".length)}`;
+      const url = cloudinaryClient().url(publicId, {
+        secure: true,
+        format: "webp",
+        resource_type: "image",
+        type: "upload",
+      });
+      return NextResponse.redirect(url);
+    }
+
     if (
       error instanceof Error &&
       "code" in error &&
