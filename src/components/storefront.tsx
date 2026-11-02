@@ -417,13 +417,9 @@ export default function Storefront({
                       <div className="home-category-media">
                         {category.imageUrl ? (
                           <img
-                            src={`${category.imageUrl}?v=1`}
+                            src={category.imageUrl}
                             alt={category.name}
                             className="home-category-img"
-                            loading="lazy"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
                           />
                         ) : (
                           <span className="home-category-placeholder">

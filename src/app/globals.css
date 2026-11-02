@@ -2429,6 +2429,7 @@ body > .bimlay-floating-action {
   object-fit: cover;
   object-position: center;
   display: block;
+  z-index: 1; 
   transition: transform 350ms ease;
 }
 
@@ -2980,7 +2981,7 @@ html:has(.bimlay-image-dialog[open]) {
 .detail-main-image,
 .hero-art,
 .hero-slider-art,
-.home-category-media,
+
 .campaign,
 .story-image,
 .cart-item-image,
