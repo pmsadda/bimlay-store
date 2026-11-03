@@ -12,7 +12,7 @@ import {
   breadcrumbSchema,
   productSchema,
   SITE_NAME,
-  SITE_URL,
+  //SITE_URL,//
 } from "@/lib/seo";
 
 type PageProps = {

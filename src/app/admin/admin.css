@@ -1619,3 +1619,232 @@ body:has(.admin-root) {
   border-radius: 4px;
   color: #20201e;
 }
+
+/* =========================================
+   NEW DASHBOARD UI
+   ========================================= */
+
+.dash-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.dash-stat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e4ded4;
+  border-radius: 12px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.dash-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(32, 32, 30, 0.05);
+}
+
+.dash-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.dash-stat-label {
+  display: block;
+  color: #68645f;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.dash-stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: #20201e;
+  line-height: 1.2;
+}
+
+.dash-stat-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.dash-stat-sub {
+  display: block;
+  margin-top: 6px;
+  color: #68645f;
+  font-size: 11px;
+}
+
+/* Bottom Layout */
+.dash-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 24px;
+}
+
+.dash-panel {
+  background: #fff;
+  border: 1px solid #e4ded4;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.dash-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dash-panel-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.dash-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #816334;
+  text-decoration: none;
+}
+
+.dash-link:hover {
+  text-decoration: underline;
+}
+
+/* Quick Actions */
+.dash-quick-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.dash-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #faf8f4;
+  border: 1px solid #e4ded4;
+  border-radius: 8px;
+  color: #20201e;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.dash-action-btn:hover {
+  background: #fff;
+  border-color: #816334;
+  color: #816334;
+}
+
+/* Recent Orders List */
+.dash-recent-orders {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0ebe3;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dash-order-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.dash-order-row:hover {
+  background: #faf8f4;
+  margin: 0 -12px;
+  padding: 14px 12px;
+  border-radius: 8px;
+}
+
+.dash-order-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-order-row strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dash-order-row span {
+  font-size: 12px;
+  color: #68645f;
+}
+
+.dash-order-right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.dash-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.dash-status.pending { background: #fff3e0; color: #e65100; }
+.dash-status.confirmed { background: #e3f2fd; color: #1565c0; }
+.dash-status.processing { background: #f3e5f5; color: #7b1fa2; }
+.dash-status.shipped { background: #e0f7fa; color: #00838f; }
+.dash-status.delivered { background: #e8f5e9; color: #2e7d32; }
+.dash-status.cancelled { background: #ffebee; color: #c62828; }
+
+.dash-empty {
+  color: #68645f;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dash-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dash-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash-stat-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-stat-card {
+    padding: 18px;
+  }
+}
