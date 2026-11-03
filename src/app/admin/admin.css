@@ -1600,3 +1600,22 @@ body:has(.admin-root) {
     padding: 10px 8px;
   }
 }
+
+/* Visitor paths (actions) list */
+.visitor-paths-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.visitor-paths-list li code {
+  display: inline-block;
+  font-size: 11px;
+  background: #f0ebe3;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #20201e;
+}

@@ -7,10 +7,10 @@ export default async function VisitorsPage() {
   await connection();
   await requireAdmin();
 
-  const [logs, totalCount, todayCount] = await Promise.all([
+  const [rawLogs, totalCount, todayCount] = await Promise.all([
     db.visitorLog.findMany({
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: 200,
     }),
     db.visitorLog.count(),
     db.visitorLog.count({
@@ -22,8 +22,30 @@ export default async function VisitorsPage() {
     }),
   ]);
 
-  const uniqueIps = new Set(logs.map((log) => log.ipAddress).filter(Boolean))
-    .size;
+  // 🔍 Group logs by IP + User Agent
+  const visitorsMap = new Map();
+
+  for (const log of rawLogs) {
+    const key = `${log.ipAddress}-${log.userAgent}`;
+    if (!visitorsMap.has(key)) {
+      visitorsMap.set(key, {
+        id: log.id,
+        ipAddress: log.ipAddress || "Unknown",
+        userAgent: log.userAgent || "Unknown",
+        lastSeen: log.createdAt,
+        paths: [log.path],
+      });
+    } else {
+      const visitor = visitorsMap.get(key);
+      // Only add unique paths
+      if (!visitor.paths.includes(log.path)) {
+        visitor.paths.push(log.path);
+      }
+    }
+  }
+
+  const visitors = Array.from(visitorsMap.values());
+  const uniqueIps = new Set(visitors.map((v) => v.ipAddress)).size;
 
   function formatDate(date: Date) {
     return new Intl.DateTimeFormat("en-GB", {
@@ -49,37 +71,37 @@ export default async function VisitorsPage() {
         <p className="eyebrow">Analytics</p>
         <h1>Visitors</h1>
         <p>
-          {totalCount} total visits — {todayCount} today.
+          {totalCount} total page views — {todayCount} today.
         </p>
       </section>
 
       <section className="admin-stat-grid">
         <article className="admin-stat">
           <Users size={23} strokeWidth={1.5} />
-          <span>Total visits</span>
+          <span>Total page views</span>
           <strong>{totalCount}</strong>
         </article>
 
         <article className="admin-stat">
           <Activity size={23} strokeWidth={1.5} />
-          <span>Today&apos;s visits</span>
+          <span>Today&apos;s page views</span>
           <strong>{todayCount}</strong>
         </article>
 
         <article className="admin-stat">
           <Globe size={23} strokeWidth={1.5} />
-          <span>Unique IPs (recent)</span>
+          <span>Unique Visitors</span>
           <strong>{uniqueIps}</strong>
         </article>
       </section>
 
       <section className="category-list">
         <div className="category-list-heading">
-          <h2>Recent visits</h2>
-          <span>Last {logs.length} entries</span>
+          <h2>Recent visitors</h2>
+          <span>Last {visitors.length} unique visitors</span>
         </div>
 
-        {logs.length === 0 ? (
+        {visitors.length === 0 ? (
           <div className="category-empty">
             No visitors tracked yet. When someone visits your store,
             they&apos;ll appear here.
@@ -90,23 +112,31 @@ export default async function VisitorsPage() {
               <table className="visitor-table">
                 <thead>
                   <tr>
-                    <th>Time</th>
+                    <th>Last Seen</th>
                     <th>IP Address</th>
                     <th>Device</th>
-                    <th>Page</th>
+                    <th>Actions (Pages Visited)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => (
-                    <tr key={log.id}>
-                      <td>{formatDate(log.createdAt)}</td>
+                  {visitors.map((visitor) => (
+                    <tr key={visitor.id}>
+                      <td>{formatDate(visitor.lastSeen)}</td>
                       <td>
-                        <code>{log.ipAddress || "Unknown"}</code>
+                        <code>{visitor.ipAddress}</code>
                       </td>
-                      <td title={log.userAgent || ""}>
-                        {shortUserAgent(log.userAgent)}
+                      <td title={visitor.userAgent || ""}>
+                        {shortUserAgent(visitor.userAgent)}
                       </td>
-                      <td>{log.path}</td>
+                      <td>
+                        <ul className="visitor-paths-list">
+                          {visitor.paths.map((path: string, i: number) => (
+                            <li key={i}>
+                              <code>{path}</code>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
