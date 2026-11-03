@@ -136,3 +136,8 @@ export type Coupon = Prisma.CouponModel
  * 
  */
 export type Review = Prisma.ReviewModel
+/**
+ * Model VisitorLog
+ * 
+ */
+export type VisitorLog = Prisma.VisitorLogModel

@@ -69,7 +69,8 @@ export const ModelName = {
   HeroSlide: 'HeroSlide',
   HomeSection: 'HomeSection',
   Coupon: 'Coupon',
-  Review: 'Review'
+  Review: 'Review',
+  VisitorLog: 'VisitorLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -378,6 +379,18 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const VisitorLogScalarFieldEnum = {
+  id: 'id',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  path: 'path',
+  referrer: 'referrer',
+  createdAt: 'createdAt'
+} as const
+
+export type VisitorLogScalarFieldEnum = (typeof VisitorLogScalarFieldEnum)[keyof typeof VisitorLogScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Suspense } from "react"; // 👈 Suspense ইমপোর্ট যোগ করা হলো
 import "./globals.css";
+import { VisitorTracker } from "@/components/visitor-tracker";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -31,6 +33,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} ${cormorant.variable}`}>
+        {/* 👇 Suspense দিয়ে VisitorTracker-কে ঘিরে দিলাম */}
+        <Suspense fallback={null}>
+          <VisitorTracker />
+        </Suspense>
+        
         {children}
       </body>
     </html>

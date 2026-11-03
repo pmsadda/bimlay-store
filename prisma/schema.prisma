@@ -372,3 +372,14 @@ model Review {
   imageUrl  String?  // Photo ba media er jonno
   createdAt DateTime @default(now())
 }
+
+model VisitorLog {
+  id        String   @id @default(cuid())
+  ipAddress String? 
+  userAgent String?  
+  path      String   
+  referrer  String?  
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

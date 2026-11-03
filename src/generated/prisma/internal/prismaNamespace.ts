@@ -415,7 +415,8 @@ export const ModelName = {
   HeroSlide: 'HeroSlide',
   HomeSection: 'HomeSection',
   Coupon: 'Coupon',
-  Review: 'Review'
+  Review: 'Review',
+  VisitorLog: 'VisitorLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "category" | "product" | "productVariant" | "productImage" | "adminUser" | "adminSession" | "adminLoginLimit" | "storeSetting" | "order" | "orderItem" | "checkoutLimit" | "orderAudit" | "customer" | "customerSession" | "customerAuthLimit" | "heroSlide" | "homeSection" | "coupon" | "review"
+    modelProps: "category" | "product" | "productVariant" | "productImage" | "adminUser" | "adminSession" | "adminLoginLimit" | "storeSetting" | "order" | "orderItem" | "checkoutLimit" | "orderAudit" | "customer" | "customerSession" | "customerAuthLimit" | "heroSlide" | "homeSection" | "coupon" | "review" | "visitorLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1841,6 +1842,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    VisitorLog: {
+      payload: Prisma.$VisitorLogPayload<ExtArgs>
+      fields: Prisma.VisitorLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VisitorLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VisitorLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        findFirst: {
+          args: Prisma.VisitorLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VisitorLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        findMany: {
+          args: Prisma.VisitorLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>[]
+        }
+        create: {
+          args: Prisma.VisitorLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        createMany: {
+          args: Prisma.VisitorLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VisitorLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>[]
+        }
+        delete: {
+          args: Prisma.VisitorLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        update: {
+          args: Prisma.VisitorLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.VisitorLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VisitorLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VisitorLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.VisitorLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VisitorLogPayload>
+        }
+        aggregate: {
+          args: Prisma.VisitorLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVisitorLog>
+        }
+        groupBy: {
+          args: Prisma.VisitorLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VisitorLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VisitorLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VisitorLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2170,6 +2245,18 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const VisitorLogScalarFieldEnum = {
+  id: 'id',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  path: 'path',
+  referrer: 'referrer',
+  createdAt: 'createdAt'
+} as const
+
+export type VisitorLogScalarFieldEnum = (typeof VisitorLogScalarFieldEnum)[keyof typeof VisitorLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2546,6 +2633,7 @@ export type GlobalOmitConfig = {
   homeSection?: Prisma.HomeSectionOmit
   coupon?: Prisma.CouponOmit
   review?: Prisma.ReviewOmit
+  visitorLog?: Prisma.VisitorLogOmit
 }
 
 /* Types for Logging */

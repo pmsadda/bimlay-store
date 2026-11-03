@@ -46,6 +46,7 @@ async function AdminFrame({ children }: { children: React.ReactNode }) {
         <Link href="/admin/media">Images</Link>
         <Link href="/admin/hero">Hero Slider</Link>
         <Link href="/admin/homepage">Homepage</Link>
+        <Link href="/admin/visitors">Visitors</Link>
         <Link href="/admin/settings">Settings</Link>
         <Link href="/" target="_blank" rel="noopener noreferrer">
           View Store
