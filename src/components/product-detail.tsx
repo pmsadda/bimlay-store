@@ -10,6 +10,7 @@ import { getCartQuantity, setCartQuantity } from "@/lib/cart-store";
 import ProductShare from "@/components/product-share";
 import { addProductReview } from "@/app/actions/reviews";
 import FlashTimer from "@/components/flash-timer";
+import { parseRichText } from "@/lib/rich-text";
 import {
   readWishlistIds,
   toggleWishlist,
@@ -312,10 +313,13 @@ export default function ProductDetail({
 
           <section className="detail-description">
             <h2>Product details</h2>
-            <p>
-              {product.description ||
-                "Further product details will be added soon."}
-            </p>
+            <div className="detail-description-content">
+              {product.description ? (
+                parseRichText(product.description)
+              ) : (
+                <p>Further product details will be added soon.</p>
+              )}
+            </div>
           </section>
 
           {/* Product Reviews & Ratings Section */}

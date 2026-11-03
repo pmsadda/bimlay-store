@@ -1481,3 +1481,57 @@ body:has(.admin-root) {
     break-inside: avoid;
   }
 }
+
+/* Rich Text Editor Toolbar */
+.rich-textarea-wrapper {
+  border: 1px solid #e4ded4;
+  background: #fffdf9;
+  display: flex;
+  flex-direction: column;
+}
+
+.rich-textarea-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e4ded4;
+  background: #faf8f4;
+}
+
+.rich-textarea-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #20201e;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.rich-textarea-toolbar button:hover {
+  background: #e4ded4;
+  border-color: #d8cebf;
+}
+
+.rich-textarea-input {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  color: #20201e;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+}
+
+.rich-textarea-input:focus {
+  outline: none;
+}

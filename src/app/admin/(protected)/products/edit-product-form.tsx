@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ProductImageEditor from "./product-image-editor";
 import { updateProduct } from "./edit-actions";
 import NewVariantEditor from "./new-variant-editor";
+import RichTextarea from "@/components/admin/rich-textarea";
 
 type ProductEditData = {
   id: string;
@@ -120,7 +121,7 @@ export default function EditProductForm({
 
             <label className="category-full-width">
               <span>Full description</span>
-              <textarea
+              <RichTextarea
                 name="description"
                 defaultValue={product.description}
                 rows={6}
